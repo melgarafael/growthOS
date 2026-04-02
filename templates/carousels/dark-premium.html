@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1080">
+  <title>{{headline}}</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-color: #0a0a0a;
+      --bg-gradient: radial-gradient(ellipse at 30% 20%, rgba(30, 30, 40, 1) 0%, #0a0a0a 70%);
+      --text-primary: #ffffff;
+      --text-secondary: #aaaaaa;
+      --accent-color: #00f0ff;
+      --font-headline: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      --slide-width: 1080px;
+      --slide-height: 1350px;
+    }
+
+    body {
+      width: var(--slide-width);
+      height: var(--slide-height);
+      overflow: hidden;
+      font-family: var(--font-body);
+      background: var(--bg-gradient, var(--bg-color));
+      color: var(--text-primary);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .slide {
+      width: var(--slide-width);
+      height: var(--slide-height);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    /* ── Decorative lines ── */
+    .line-top {
+      position: absolute;
+      top: 60px;
+      left: 100px;
+      right: 100px;
+      height: 1px;
+      background: linear-gradient(90deg, var(--accent-color), transparent 40%, transparent 60%, var(--accent-color));
+      opacity: 0.4;
+    }
+    .line-bottom {
+      position: absolute;
+      bottom: 100px;
+      left: 100px;
+      right: 100px;
+      height: 1px;
+      background: linear-gradient(90deg, var(--accent-color), transparent 40%, transparent 60%, var(--accent-color));
+      opacity: 0.4;
+    }
+
+    /* ── Subtle corner accents ── */
+    .corner-accent {
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      z-index: 1;
+    }
+    .corner-tl {
+      top: 48px;
+      left: 88px;
+      border-top: 2px solid var(--accent-color);
+      border-left: 2px solid var(--accent-color);
+      opacity: 0.5;
+    }
+    .corner-tr {
+      top: 48px;
+      right: 88px;
+      border-top: 2px solid var(--accent-color);
+      border-right: 2px solid var(--accent-color);
+      opacity: 0.5;
+    }
+    .corner-bl {
+      bottom: 88px;
+      left: 88px;
+      border-bottom: 2px solid var(--accent-color);
+      border-left: 2px solid var(--accent-color);
+      opacity: 0.5;
+    }
+    .corner-br {
+      bottom: 88px;
+      right: 88px;
+      border-bottom: 2px solid var(--accent-color);
+      border-right: 2px solid var(--accent-color);
+      opacity: 0.5;
+    }
+
+    .slide-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 120px 120px 160px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ── COVER ── */
+    .slide-cover .slide-main {
+      align-items: flex-start;
+    }
+    .slide-cover .icon {
+      font-size: 64px;
+      margin-bottom: 40px;
+      line-height: 1;
+    }
+    .slide-cover .headline {
+      font-family: var(--font-headline);
+      font-size: 72px;
+      font-weight: 700;
+      line-height: 1.08;
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
+    }
+    .slide-cover .headline .accent {
+      color: var(--accent-color);
+      text-shadow: 0 0 40px rgba(0, 240, 255, 0.3);
+    }
+    .slide-cover .body {
+      font-size: 28px;
+      color: var(--text-secondary);
+      margin-top: 36px;
+      line-height: 1.6;
+      max-width: 680px;
+    }
+    .slide-cover .divider {
+      width: 80px;
+      height: 2px;
+      background: var(--accent-color);
+      margin-top: 48px;
+      box-shadow: 0 0 12px var(--accent-color);
+    }
+
+    /* ── CONTENT ── */
+    .slide-content .slide-main {
+      align-items: flex-start;
+    }
+    .slide-content .icon {
+      font-size: 52px;
+      margin-bottom: 24px;
+      line-height: 1;
+    }
+    .slide-content .headline {
+      font-family: var(--font-headline);
+      font-size: 52px;
+      font-weight: 700;
+      line-height: 1.15;
+      color: var(--text-primary);
+      margin-bottom: 24px;
+    }
+    .slide-content .body {
+      font-size: 27px;
+      color: var(--text-secondary);
+      line-height: 1.65;
+      margin-bottom: 36px;
+    }
+    .slide-content .bullets {
+      list-style: none;
+      padding: 0;
+      width: 100%;
+    }
+    .slide-content .bullets li {
+      font-size: 27px;
+      color: #cccccc;
+      padding: 18px 0 18px 40px;
+      position: relative;
+      line-height: 1.45;
+      font-weight: 500;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .slide-content .bullets li:last-child {
+      border-bottom: none;
+    }
+    .slide-content .bullets li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 8px;
+      height: 8px;
+      background: var(--accent-color);
+      box-shadow: 0 0 10px var(--accent-color);
+      border-radius: 50%;
+    }
+
+    /* ── CTA ── */
+    .slide-cta .slide-main {
+      align-items: center;
+      text-align: center;
+    }
+    .slide-cta .headline {
+      font-family: var(--font-headline);
+      font-size: 64px;
+      font-weight: 700;
+      line-height: 1.1;
+      color: var(--text-primary);
+      margin-bottom: 48px;
+    }
+    .slide-cta .cta-button {
+      display: inline-block;
+      padding: 28px 72px;
+      background: transparent;
+      border: 2px solid var(--accent-color);
+      color: var(--accent-color);
+      font-size: 26px;
+      font-weight: 700;
+      text-decoration: none;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      box-shadow: 0 0 24px rgba(0, 240, 255, 0.15), inset 0 0 24px rgba(0, 240, 255, 0.05);
+    }
+
+    /* ── BOTTOM BAR ── */
+    .bottom-bar {
+      position: absolute;
+      bottom: 40px;
+      left: 120px;
+      right: 120px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 2;
+    }
+    .brand-handle {
+      font-size: 22px;
+      color: var(--text-secondary);
+      font-weight: 500;
+      letter-spacing: 0.02em;
+    }
+    .progress {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .progress-dots {
+      display: flex;
+      gap: 8px;
+    }
+    .progress-dots .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.15);
+    }
+    .progress-dots .dot.active {
+      background: var(--accent-color);
+      box-shadow: 0 0 8px var(--accent-color);
+    }
+    .slide-counter {
+      font-size: 20px;
+      color: var(--text-secondary);
+      font-weight: 500;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* ── Neon glow effect on accent text ── */
+    .neon {
+      color: var(--accent-color);
+      text-shadow: 0 0 20px rgba(0, 240, 255, 0.4), 0 0 40px rgba(0, 240, 255, 0.15);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- COVER variant -->
+  <div class="slide slide-cover">
+    <div class="line-top"></div>
+    <div class="line-bottom"></div>
+    <div class="corner-accent corner-tl"></div>
+    <div class="corner-accent corner-tr"></div>
+    <div class="corner-accent corner-bl"></div>
+    <div class="corner-accent corner-br"></div>
+    <div class="slide-main">
+      <div class="icon">{{icon}}</div>
+      <h1 class="headline">{{headline}}</h1>
+      <p class="body">{{body}}</p>
+      <div class="divider"></div>
+    </div>
+    <div class="bottom-bar">
+      <span class="brand-handle">{{brand_handle}}</span>
+      <div class="progress">
+        <div class="progress-dots">{{progress_dots}}</div>
+        <span class="slide-counter">{{slide_number}}/{{total_slides}}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTENT variant -->
+  <!--
+  <div class="slide slide-content">
+    <div class="line-top"></div>
+    <div class="line-bottom"></div>
+    <div class="corner-accent corner-tl"></div>
+    <div class="corner-accent corner-tr"></div>
+    <div class="corner-accent corner-bl"></div>
+    <div class="corner-accent corner-br"></div>
+    <div class="slide-main">
+      <div class="icon">{{icon}}</div>
+      <h2 class="headline">{{headline}}</h2>
+      <p class="body">{{body}}</p>
+      <ul class="bullets">{{bullets}}</ul>
+    </div>
+    <div class="bottom-bar">
+      <span class="brand-handle">{{brand_handle}}</span>
+      <div class="progress">
+        <div class="progress-dots">{{progress_dots}}</div>
+        <span class="slide-counter">{{slide_number}}/{{total_slides}}</span>
+      </div>
+    </div>
+  </div>
+  -->
+
+  <!-- CTA variant -->
+  <!--
+  <div class="slide slide-cta">
+    <div class="line-top"></div>
+    <div class="line-bottom"></div>
+    <div class="corner-accent corner-tl"></div>
+    <div class="corner-accent corner-tr"></div>
+    <div class="corner-accent corner-bl"></div>
+    <div class="corner-accent corner-br"></div>
+    <div class="slide-main">
+      <h2 class="headline">{{headline}}</h2>
+      <a href="{{cta_action}}" class="cta-button">{{cta_text}}</a>
+    </div>
+    <div class="bottom-bar">
+      <span class="brand-handle">{{brand_handle}}</span>
+      <div class="progress">
+        <div class="progress-dots">{{progress_dots}}</div>
+        <span class="slide-counter">{{slide_number}}/{{total_slides}}</span>
+      </div>
+    </div>
+  </div>
+  -->
+
+</body>
+</html>

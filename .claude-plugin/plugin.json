@@ -1,0 +1,9 @@
+{
+  "name": "growthOS",
+  "version": "1.0.0",
+  "description": "Autonomous marketing team for Claude Code — 10 AI agents, 11 skills, 4 MCP servers, one /grow command",
+  "author": {
+    "name": "GrowthOS Community"
+  },
+  "license": "MIT"
+}

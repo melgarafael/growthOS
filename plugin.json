@@ -1,0 +1,56 @@
+{
+  "name": "growthOS",
+  "version": "1.0.0",
+  "description": "Autonomous marketing team for Claude Code — 9 AI agents, 20 skills, 4 MCP servers, one /grow command",
+  "author": "GrowthOS Community",
+  "license": "MIT",
+  "repository": "https://github.com/melgarafael/growthOS",
+  "skills": [
+    {"path": "skills/marketing-strategy"},
+    {"path": "skills/copywriting"},
+    {"path": "skills/seo-growth"},
+    {"path": "skills/content-creation"},
+    {"path": "skills/social-media-management"},
+    {"path": "skills/competitive-intelligence"},
+    {"path": "skills/video-production"},
+    {"path": "skills/landing-page-design"},
+    {"path": "skills/platform-mastery"},
+    {"path": "skills/instagram-carousel"},
+    {"path": "skills/remotion-video"},
+    {"path": "skills/remotion-pro"},
+    {"path": "skills/showcase-before-after"},
+    {"path": "skills/showcase-course-trailer"},
+    {"path": "skills/showcase-data-story"},
+    {"path": "skills/showcase-feature-highlight"},
+    {"path": "skills/showcase-product-demo"},
+    {"path": "skills/showcase-social-proof"},
+    {"path": "skills/showcase-tech-terminal"},
+    {"path": "skills/showcase-walkthrough"}
+  ],
+  "agents": [
+    {"path": "agents/cmo"},
+    {"path": "agents/growth-strategist"},
+    {"path": "agents/content-creator"},
+    {"path": "agents/intelligence-analyst"},
+    {"path": "agents/visual-designer"},
+    {"path": "agents/social-publisher"},
+    {"path": "agents/growth-engineer"},
+    {"path": "agents/carousel-designer"},
+    {"path": "agents/video-producer"}
+  ],
+  "hooks": [
+    {"path": "hooks/audit-logger"},
+    {"path": "hooks/circuit-breaker"},
+    {"path": "hooks/preview-before-publish"},
+    {"path": "hooks/dry-run-guard"}
+  ],
+  "commands": [
+    {"path": "commands/grow"}
+  ],
+  "mcp-servers": [
+    {"path": "mcp-servers/mcp-social-publish"},
+    {"path": "mcp-servers/mcp-social-discover"},
+    {"path": "mcp-servers/mcp-obsidian-vault"},
+    {"path": "mcp-servers/mcp-remotion-render"}
+  ]
+}

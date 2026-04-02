@@ -1,0 +1,3 @@
+fastmcp
+pyyaml
+python-frontmatter

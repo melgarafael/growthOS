@@ -1,0 +1,72 @@
+name: GrowthOS CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "growthOS/**"
+  pull_request:
+    branches: [main]
+    paths:
+      - "growthOS/**"
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install ruff
+      - run: ruff check growthOS/
+      - run: ruff format --check growthOS/
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: |
+          pip install -e growthOS/shared-lib/
+          pip install -r growthOS/mcp-servers/mcp-social-publish/requirements.txt
+          pip install -r growthOS/mcp-servers/mcp-social-discover/requirements.txt
+          pip install -r growthOS/mcp-servers/mcp-obsidian-vault/requirements.txt
+          pip install pytest pytest-asyncio pytest-cov
+      - name: Run tests
+        run: pytest growthOS/shared-lib/tests/ -v --tb=short
+
+  docker:
+    name: Docker Build
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build MCP Social Publish
+        run: docker build --target mcp-social-publish -t growthos-social-publish:test growthOS/
+      - name: Build MCP Social Discover
+        run: docker build --target mcp-social-discover -t growthos-social-discover:test growthOS/
+      - name: Build MCP Obsidian Vault
+        run: docker build --target mcp-obsidian-vault -t growthos-obsidian-vault:test growthOS/
+
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    needs: docker
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build image for scan
+        run: docker build --target mcp-social-publish -t growthos-scan:latest growthOS/
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: growthos-scan:latest
+          format: table
+          exit-code: "1"
+          severity: CRITICAL,HIGH

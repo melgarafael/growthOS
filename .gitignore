@@ -1,0 +1,40 @@
+# Brand voice config (contains user-specific data)
+brand-voice.yaml
+
+# Environment variables
+.env
+.env.*
+
+# GrowthOS runtime artifacts
+.growthOS/
+out/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+*.egg
+.venv/
+venv/
+
+# Node
+node_modules/
+
+# Epic executor artifacts
+.epic-executor/
+
+# Test cache
+.pytest_cache/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db

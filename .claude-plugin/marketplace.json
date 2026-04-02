@@ -1,0 +1,17 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "growthOS",
+  "description": "Local marketplace for GrowthOS autonomous marketing plugin",
+  "owner": {
+    "name": "GrowthOS Community"
+  },
+  "plugins": [
+    {
+      "name": "growthOS",
+      "description": "Autonomous marketing team for Claude Code — 9 AI agents, 20 skills, 4 MCP servers, one /grow command",
+      "version": "1.0.0",
+      "source": "./",
+      "category": "marketing"
+    }
+  ]
+}

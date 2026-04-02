@@ -1,0 +1,42 @@
+# Secrets — never bake into image
+.env
+*.key
+*.pem
+*.secret
+
+# User-specific config
+brand-voice.yaml
+.growthOS/
+
+# Python artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.venv/
+venv/
+dist/
+build/
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+docker-compose.yml
+docker-compose.override.yml
+
+# Docs (not needed in image)
+CONTRIBUTING.md
+SECURITY.md
+.github/

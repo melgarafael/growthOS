@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1080">
+  <title>{{headline}}</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-color: #4a00e0;
+      --bg-gradient: linear-gradient(135deg, #8e2de2 0%, #4a00e0 50%, #2196f3 100%);
+      --text-primary: #ffffff;
+      --text-secondary: rgba(255, 255, 255, 0.8);
+      --accent-color: #00d4ff;
+      --font-headline: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      --slide-width: 1080px;
+      --slide-height: 1350px;
+    }
+
+    body {
+      width: var(--slide-width);
+      height: var(--slide-height);
+      overflow: hidden;
+      font-family: var(--font-body);
+      background: var(--bg-gradient, var(--bg-color));
+      color: var(--text-primary);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .slide {
+      width: var(--slide-width);
+      height: var(--slide-height);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 100px;
+      position: relative;
+    }
+
+    /* ── Glassmorphism card ── */
+    .glass-card {
+      background: rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 32px;
+      padding: 72px 64px;
+      width: 100%;
+      max-width: 880px;
+      box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    }
+
+    /* ── Decorative orbs ── */
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      z-index: 0;
+      opacity: 0.4;
+    }
+    .orb-1 {
+      top: -120px;
+      right: -60px;
+      width: 400px;
+      height: 400px;
+      background: var(--accent-color);
+    }
+    .orb-2 {
+      bottom: 100px;
+      left: -80px;
+      width: 300px;
+      height: 300px;
+      background: #ff6b9d;
+    }
+    .orb-3 {
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 500px;
+      height: 500px;
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .slide-inner {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* ── COVER ── */
+    .slide-cover {
+      text-align: center;
+    }
+    .slide-cover .icon {
+      font-size: 80px;
+      margin-bottom: 36px;
+      line-height: 1;
+      filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.2));
+    }
+    .slide-cover .headline {
+      font-family: var(--font-headline);
+      font-size: 68px;
+      font-weight: 800;
+      line-height: 1.08;
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
+      text-shadow: 0 2px 20px rgba(0, 0, 0, 0.15);
+    }
+    .slide-cover .body {
+      font-size: 30px;
+      color: var(--text-secondary);
+      margin-top: 28px;
+      line-height: 1.5;
+      max-width: 680px;
+    }
+
+    /* ── CONTENT ── */
+    .slide-content {
+      align-items: center;
+    }
+    .slide-content .glass-card {
+      text-align: left;
+    }
+    .slide-content .icon {
+      font-size: 56px;
+      margin-bottom: 24px;
+      line-height: 1;
+    }
+    .slide-content .headline {
+      font-family: var(--font-headline);
+      font-size: 50px;
+      font-weight: 800;
+      line-height: 1.15;
+      color: var(--text-primary);
+      margin-bottom: 24px;
+    }
+    .slide-content .body {
+      font-size: 28px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: 32px;
+    }
+    .slide-content .bullets {
+      list-style: none;
+      padding: 0;
+      width: 100%;
+    }
+    .slide-content .bullets li {
+      font-size: 27px;
+      color: var(--text-primary);
+      padding: 16px 0 16px 40px;
+      position: relative;
+      line-height: 1.4;
+      font-weight: 500;
+    }
+    .slide-content .bullets li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--accent-color);
+      box-shadow: 0 0 16px var(--accent-color);
+    }
+
+    /* ── CTA ── */
+    .slide-cta {
+      text-align: center;
+    }
+    .slide-cta .headline {
+      font-family: var(--font-headline);
+      font-size: 60px;
+      font-weight: 800;
+      line-height: 1.1;
+      color: var(--text-primary);
+      margin-bottom: 48px;
+      text-shadow: 0 2px 20px rgba(0, 0, 0, 0.15);
+    }
+    .slide-cta .cta-button {
+      display: inline-block;
+      padding: 28px 72px;
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 2px solid rgba(255, 255, 255, 0.4);
+      border-radius: 60px;
+      color: #ffffff;
+      font-size: 28px;
+      font-weight: 700;
+      text-decoration: none;
+      letter-spacing: 0.02em;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+    }
+
+    /* ── BOTTOM BAR ── */
+    .bottom-bar {
+      position: absolute;
+      bottom: 40px;
+      left: 100px;
+      right: 100px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 2;
+    }
+    .brand-handle {
+      font-size: 22px;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+    .progress {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .progress-dots {
+      display: flex;
+      gap: 8px;
+    }
+    .progress-dots .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.25);
+    }
+    .progress-dots .dot.active {
+      background: var(--accent-color);
+      box-shadow: 0 0 10px var(--accent-color);
+    }
+    .slide-counter {
+      font-size: 20px;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- COVER variant -->
+  <div class="slide slide-cover">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div class="slide-inner">
+      <div class="glass-card">
+        <div class="icon">{{icon}}</div>
+        <h1 class="headline">{{headline}}</h1>
+        <p class="body">{{body}}</p>
+      </div>
+    </div>
+    <div class="bottom-bar">
+      <span class="brand-handle">{{brand_handle}}</span>
+      <div class="progress">
+        <div class="progress-dots">{{progress_dots}}</div>
+        <span class="slide-counter">{{slide_number}}/{{total_slides}}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTENT variant -->
+  <!--
+  <div class="slide slide-content">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="slide-inner">
+      <div class="glass-card">
+        <div class="icon">{{icon}}</div>
+        <h2 class="headline">{{headline}}</h2>
+        <p class="body">{{body}}</p>
+        <ul class="bullets">{{bullets}}</ul>
+      </div>
+    </div>
+    <div class="bottom-bar">
+      <span class="brand-handle">{{brand_handle}}</span>
+      <div class="progress">
+        <div class="progress-dots">{{progress_dots}}</div>
+        <span class="slide-counter">{{slide_number}}/{{total_slides}}</span>
+      </div>
+    </div>
+  </div>
+  -->
+
+  <!-- CTA variant -->
+  <!--
+  <div class="slide slide-cta">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="slide-inner">
+      <div class="glass-card">
+        <h2 class="headline">{{headline}}</h2>
+        <a href="{{cta_action}}" class="cta-button">{{cta_text}}</a>
+      </div>
+    </div>
+    <div class="bottom-bar">
+      <span class="brand-handle">{{brand_handle}}</span>
+      <div class="progress">
+        <div class="progress-dots">{{progress_dots}}</div>
+        <span class="slide-counter">{{slide_number}}/{{total_slides}}</span>
+      </div>
+    </div>
+  </div>
+  -->
+
+</body>
+</html>

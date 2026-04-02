@@ -1,0 +1,26 @@
+{
+  "name": "growthos-remotion",
+  "version": "1.0.0",
+  "description": "GrowthOS video production with Remotion",
+  "scripts": {
+    "start": "npx remotion studio",
+    "build": "npx remotion render",
+    "test": "echo \"No tests yet\" && exit 0"
+  },
+  "dependencies": {
+    "@remotion/cli": "^4.0.0",
+    "@remotion/google-fonts": "4.0.443",
+    "@remotion/light-leaks": "4.0.443",
+    "@remotion/paths": "4.0.443",
+    "@remotion/renderer": "^4.0.0",
+    "@remotion/transitions": "4.0.443",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "remotion": "^4.0.0",
+    "typescript": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0"
+  }
+}

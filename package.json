@@ -1,0 +1,40 @@
+{
+  "name": "growthos",
+  "version": "1.0.0",
+  "description": "Autonomous marketing team for Claude Code — 7 AI agents, 9 skills, 3 MCP servers, one `/grow` command.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "studio": "cd remotion && npx remotion studio src/index.ts",
+    "studio:simple": "cd remotion && npx remotion studio index.ts",
+    "render": "cd remotion && npx remotion render src/index.ts ReelTips ../out/video.mp4",
+    "render:reel": "cd remotion && npx remotion render src/index.ts ReelTips ../out/video.mp4",
+    "render:before-after": "cd remotion && npx remotion render src/index.ts ReelBeforeAfter ../out/video.mp4",
+    "render:numbers": "cd remotion && npx remotion render src/index.ts ReelNumbers ../out/video.mp4",
+    "render:explainer": "cd remotion && npx remotion render src/index.ts ExplainerSteps ../out/video.mp4",
+    "render:demo": "cd remotion && npx remotion render src/index.ts ExplainerDemo ../out/video.mp4",
+    "render:carousel": "cd remotion && npx remotion render src/index.ts CarouselAnimated ../out/video.mp4",
+    "preview": "cd remotion && npx remotion still src/index.ts ReelTips ../out/preview.png --frame=45",
+    "compositions": "cd remotion && npx remotion compositions src/index.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "GrowthOS Community",
+  "license": "MIT",
+  "type": "commonjs",
+  "dependencies": {
+    "@remotion/bundler": "^4.0.443",
+    "@remotion/cli": "^4.0.443",
+    "@remotion/renderer": "^4.0.443",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "remotion": "^4.0.443"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "typescript": "^6.0.2"
+  }
+}

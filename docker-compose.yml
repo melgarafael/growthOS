@@ -1,0 +1,63 @@
+version: "3.9"
+
+services:
+  mcp-social-publish:
+    build:
+      context: .
+      target: mcp-social-publish
+    container_name: growthos-social-publish
+    env_file: .env
+    ports:
+      - "8001:8001"
+    networks:
+      - growthos
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  mcp-social-discover:
+    build:
+      context: .
+      target: mcp-social-discover
+    container_name: growthos-social-discover
+    env_file: .env
+    ports:
+      - "8002:8002"
+    networks:
+      - growthos
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8002/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  mcp-obsidian-vault:
+    build:
+      context: .
+      target: mcp-obsidian-vault
+    container_name: growthos-obsidian-vault
+    env_file: .env
+    ports:
+      - "8003:8003"
+    volumes:
+      - ${GROWTHOS_VAULT_PATH:-./vault}:/vault:rw
+    networks:
+      - growthos
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8003/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+networks:
+  growthos:
+    driver: bridge
+    name: growthos-network

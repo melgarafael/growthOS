@@ -1,0 +1,88 @@
+# GrowthOS Brand Voice Configuration
+# Copy this file to brand-voice.yaml and customize for your brand
+
+brand:
+  name: "MyProduct"           # Required - your brand/product name
+  tagline: ""                 # Optional
+  tone:                        # Required - list of tone descriptors
+    - professional
+    - approachable
+    - innovative
+  avoid:                       # Words/phrases your brand avoids
+    - synergy
+    - disrupt
+  personality: ""             # Personality description
+  industry: ""               # For context
+
+platforms:
+  linkedin:
+    enabled: true
+    tone_override: null
+    hashtags: true
+    max_length: 3000
+    post_types: [article, post, carousel]
+  twitter:
+    enabled: true
+    tone_override: "concise_witty"
+    threads: true
+    max_length: 280
+  reddit:
+    enabled: true
+    tone_override: "authentic_casual"
+    max_length: 10000
+  threads:
+    enabled: true
+    tone_override: null
+    max_length: 500
+  github:
+    enabled: true
+    tone_override: "technical_precise"
+    max_length: null
+  youtube:
+    enabled: true
+    tone_override: null
+    max_length: 5000
+  instagram:
+    enabled: true
+    tone_override: "visual_engaging"
+    max_length: 2200
+  stackoverflow:
+    enabled: false
+    tone_override: "technical_helpful"
+    max_length: 30000
+
+anti_slop:
+  enabled: true
+  banned_phrases:
+    - "game-changer"
+    - "revolutionary"
+    - "cutting-edge"
+    - "best-in-class"
+    - "synergy"
+    - "leverage"
+    - "disrupt"
+    - "innovative solution"
+    - "transform your"
+    - "unlock the power"
+    - "dive deep"
+    - "it's worth noting"
+    - "in today's fast-paced"
+    - "at the end of the day"
+    - "think outside the box"
+    - "move the needle"
+    - "low-hanging fruit"
+    - "paradigm shift"
+    - "holistic approach"
+    - "seamlessly integrate"
+  style_rules:
+    - "Use active voice"
+    - "Avoid superlatives without evidence"
+    - "No clickbait headlines"
+    - "Prefer specific numbers over vague claims"
+  custom_banned: []
+
+autonomy:
+  level: semi                  # manual | semi | auto
+  require_preview: true
+  dry_run_default: true
+  kill_switch: true
