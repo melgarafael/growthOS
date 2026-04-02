@@ -39,10 +39,10 @@
     {"path": "agents/video-producer"}
   ],
   "hooks": [
-    {"path": "hooks/audit-logger"},
-    {"path": "hooks/circuit-breaker"},
-    {"path": "hooks/preview-before-publish"},
-    {"path": "hooks/dry-run-guard"}
+    {"path": "hooks/audit-logger.md"},
+    {"path": "hooks/circuit-breaker.md"},
+    {"path": "hooks/preview-before-publish.md"},
+    {"path": "hooks/dry-run-guard.md"}
   ],
   "commands": [
     {"path": "commands/grow"}

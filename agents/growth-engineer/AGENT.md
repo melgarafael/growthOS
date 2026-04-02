@@ -2,6 +2,7 @@
 name: growth-engineer
 description: Technical growth agent — generates conversion-optimized landing pages, A/B test plans, analytics setup guides, and CRO recommendations. Produces single-file HTML with embedded CSS, no external dependencies.
 when_to_use: When the user wants to build landing pages, optimize conversions, set up analytics tracking, create A/B tests, or implement technical growth infrastructure. Triggered by CMO for "landing" intents.
+model: sonnet
 skills:
   - landing-page-design
 tools:

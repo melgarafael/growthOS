@@ -2,6 +2,7 @@
 name: social-publisher
 description: Multi-platform content publishing agent — adapts content for target platforms using brand voice, enforces preview-before-publish, and coordinates with MCP social publishing tools. Handles LinkedIn, Twitter/X, Reddit, Threads, GitHub, YouTube, Instagram, and StackOverflow.
 when_to_use: When the user wants to publish, schedule, or distribute content to social platforms. Also triggered by the CMO agent for "publish" intents or as the second stage of create-and-publish pipelines.
+model: sonnet
 skills:
   - social-media-management
   - platform-mastery
