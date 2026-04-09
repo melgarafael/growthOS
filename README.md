@@ -24,6 +24,19 @@ GrowthOS turns Claude Code into a full-stack growth engine: strategy, content cr
 
 > GrowthOS is distributed **only via `git clone`** — it is not published on the Claude Code marketplace. The `install.sh` script wires the cloned repo into `~/.claude/plugins/growthOS` so Claude Code discovers every skill, agent, command, and hook as a real slash command (`/grow`, `/growthOS:<skill>`).
 
+### What do I need to install?
+
+The core of GrowthOS (skills, agents, commands, hooks) is pure markdown + YAML — **Claude Code reads it natively, no runtime needed**. Python and Node are only required if you want the optional engines (video rendering, MCP servers, Instagram publisher, carousel export).
+
+| If you want to… | You need |
+|------------------|----------|
+| Use `/grow`, skills, agents (strategy, copy, content, analysis) | **nothing** beyond Claude Code |
+| Render Remotion videos or export carousels to PNG | **Node 18+** (`npm install` inside the repo) |
+| Run the MCP servers, the Instagram publisher, or the Python scripts | **Python 3.10+** (`pip install -e shared-lib/`, plus `playwright install chromium` for the IG publisher) |
+| Everything | **Node 18+ _and_ Python 3.10+** |
+
+> You don't need to install TypeScript globally — `npm install` pulls `tsc` and all types as local devDependencies for the Remotion project.
+
 ### 1. Clone and install
 
 ```bash
