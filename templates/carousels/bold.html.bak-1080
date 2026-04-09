@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1080">
+  <title>{{headline}}</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-color: #1a1a2e;
+      --bg-gradient: linear-gradient(165deg, #1a1a2e 0%, #16213e 100%);
+      --text-primary: #ffffff;
+      --text-secondary: rgba(255, 255, 255, 0.7);
+      --accent-color: #e94560;
+      --font-headline: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      --slide-width: 1080px;
+      --slide-height: 1350px;
+    }
+
+    body {
+      width: var(--slide-width);
+      height: var(--slide-height);
+      overflow: hidden;
+      font-family: var(--font-body);
+      background: var(--bg-gradient, var(--bg-color));
+      color: var(--text-primary);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .slide {
+      width: var(--slide-width);
+      height: var(--slide-height);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* ── Geometric shapes ── */
+    .geo-block {
+      position: absolute;
+      z-index: 0;
+    }
+    .geo-block-1 {
+      top: -80px;
+      right: -60px;
+      width: 360px;
+      height: 360px;
+      background: var(--accent-color);
+      transform: rotate(25deg);
+      opacity: 0.15;
+    }
+    .geo-block-2 {
+      bottom: 160px;
+      left: -100px;
+      width: 280px;
+      height: 280px;
+      background: var(--accent-color);
+      transform: rotate(-15deg);
+      opacity: 0.1;
+      border-radius: 24px;
+    }
+    .geo-block-3 {
+      top: 40%;
+      right: 60px;
+      width: 180px;
+      height: 180px;
+      border: 4px solid var(--accent-color);
+      transform: rotate(45deg);
+      opacity: 0.2;
+      border-radius: 12px;
+    }
+
+    .slide-inner {
+      position: relative;
+      z-index: 1;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 100px 100px 140px;
+    }
+
+    /* ── COVER ── */
+    .slide-cover .slide-inner {
+      justify-content: center;
+      align-items: flex-start;
+    }
+    .slide-cover .accent-tag {
+      display: inline-block;
+      background: var(--accent-color);
+      color: #ffffff;
+      font-size: 22px;
+      font-weight: 700;
+      padding: 10px 28px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 40px;
+    }
+    .slide-cover .icon {
+      font-size: 80px;
+      margin-bottom: 36px;
+      line-height: 1;
+    }
+    .slide-cover .headline {
+      font-family: var(--font-headline);
+      font-size: 76px;
+      font-weight: 900;
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
+      text-transform: uppercase;
+    }
+    .slide-cover .body {
+      font-size: 30px;
+      color: var(--text-secondary);
+      margin-top: 32px;
+      line-height: 1.5;
+      max-width: 700px;
+    }
+
+    /* ── CONTENT ── */
+    .slide-content .slide-inner {
+      justify-content: center;
+      align-items: flex-start;
+    }
+    .slide-content .icon {
+      font-size: 64px;
+      margin-bottom: 28px;
+      line-height: 1;
+    }
+    .slide-content .headline {
+      font-family: var(--font-headline);
+      font-size: 54px;
+      font-weight: 800;
+      line-height: 1.12;
+      letter-spacing: -0.015em;
+      color: var(--text-primary);
+      margin-bottom: 28px;
+    }
+    .slide-content .body {
+      font-size: 28px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: 36px;
+    }
+    .slide-content .bullets {
+      list-style: none;
+      padding: 0;
+      width: 100%;
+    }
+    .slide-content .bullets li {
+      font-size: 28px;
+      color: var(--text-primary);
+      padding: 18px 0 18px 32px;
+      position: relative;
+      line-height: 1.4;
+      font-weight: 600;
+    }
+    .slide-content .bullets li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 14px;
+      height: 14px;
+      background: var(--accent-color);
+    }
+
+    /* ── CTA ── */
+    .slide-cta .slide-inner {
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+    .slide-cta .headline {
+      font-family: var(--font-headline);
+      font-size: 68px;
+      font-weight: 900;
+      line-height: 1.08;
+      color: var(--text-primary);
+      text-transform: uppercase;
+      margin-bottom: 56px;
+    }
+    .slide-cta .cta-button {
+      display: inline-block;
+      padding: 30px 80px;
+      background: var(--accent-color);
+      color: #ffffff;
+      font-size: 28px;
+      font-weight: 800;
+      text-decoration: none;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      transition: transform 0.2s;
+    }
+
+    /* ── ACCENT BAR (bottom) ── */
+    .accent-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 10px;
+      background: var(--accent-color);
+      z-index: 2;
+    }
+
+    /* ── BOTTOM BAR ── */
+    .bottom-bar {
+      position: absolute;
+      bottom: 30px;
+      left: 100px;
+      right: 100px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 3;
+    }
+    .brand-handle {
+      font-size: 22px;
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+    .progress {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .progress-dots {
+      display: flex;
+      gap: 8px;
+    }
+    .progress-dots .dot {
+      width: 12px;
+      height: 12px;
+      background: rgba(255, 255, 255, 0.2);
+    }
+    .progress-dots .dot.active {
+      background: var(--accent-color);
+    }
+    .slide-counter {
+      font-size: 20px;
+      color: var(--text-secondary);
+      font-weight: 600;
+      margin-left: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- COVER variant -->
+  <div class="slide slide-cover">
+    <div class="geo-block geo-block-1"></div>
+    <div class="geo-block geo-block-2"></div>
+    <div class="geo-block geo-block-3"></div>
+    <div class="slide-inner">
+      <span class="accent-tag">{{brand_name}}</span>
+      <div class="icon">{{icon}}</div>
+      <h1 class="headline">{{headline}}</h1>
+      <p class="body">{{body}}</p>
+    </div>
+    <div class="accent-bar"></div>
+    <div class="bottom-bar">
+      <span class="brand-handle">{{brand_handle}}</span>
+      <div class="progress">
+        <div class="progress-dots">{{progress_dots}}</div>
+        <span class="slide-counter">{{slide_number}}/{{total_slides}}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTENT variant -->
+  <!--
+  <div class="slide slide-content">
+    <div class="geo-block geo-block-1"></div>
+    <div class="geo-block geo-block-2"></div>
+    <div class="geo-block geo-block-3"></div>
+    <div class="slide-inner">
+      <div class="icon">{{icon}}</div>
+      <h2 class="headline">{{headline}}</h2>
+      <p class="body">{{body}}</p>
+      <ul class="bullets">{{bullets}}</ul>
+    </div>
+    <div class="accent-bar"></div>
+    <div class="bottom-bar">
+      <span class="brand-handle">{{brand_handle}}</span>
+      <div class="progress">
+        <div class="progress-dots">{{progress_dots}}</div>
+        <span class="slide-counter">{{slide_number}}/{{total_slides}}</span>
+      </div>
+    </div>
+  </div>
+  -->
+
+  <!-- CTA variant -->
+  <!--
+  <div class="slide slide-cta">
+    <div class="geo-block geo-block-1"></div>
+    <div class="geo-block geo-block-2"></div>
+    <div class="geo-block geo-block-3"></div>
+    <div class="slide-inner">
+      <h2 class="headline">{{headline}}</h2>
+      <a href="{{cta_action}}" class="cta-button">{{cta_text}}</a>
+    </div>
+    <div class="accent-bar"></div>
+    <div class="bottom-bar">
+      <span class="brand-handle">{{brand_handle}}</span>
+      <div class="progress">
+        <div class="progress-dots">{{progress_dots}}</div>
+        <span class="slide-counter">{{slide_number}}/{{total_slides}}</span>
+      </div>
+    </div>
+  </div>
+  -->
+
+</body>
+</html>

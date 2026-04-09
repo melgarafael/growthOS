@@ -1,15 +1,79 @@
-# Brand voice config (contains user-specific data)
-brand-voice.yaml
+# ──────────────────────────────────────────────────────────────
+# GrowthOS .gitignore
+#
+# Philosophy:
+#   - Keep folder STRUCTURE (so any project works out of the box)
+#   - Ignore CONTENT that is personal or unique per project
+#     (brand voice, design system, assets, outputs)
+#   - Empty folders are preserved via .gitkeep files
+# ──────────────────────────────────────────────────────────────
 
-# Environment variables
+# ── Secrets & environment ─────────────────────────────────────
 .env
 .env.*
+!.env.example
+*.key
+*.pem
+*.secret
 
-# GrowthOS runtime artifacts
+# ── Personal brand voice config ───────────────────────────────
+brand-voice.yaml
+!brand-voice.example.yaml
+
+# ── Personal content: voice/ (brand voice, golden docs, etc.) ─
+# Keep folder structure, ignore everything else.
+voice/**
+!voice/
+!voice/**/
+!voice/.gitkeep
+!voice/**/.gitkeep
+!voice/README.md
+
+# ── Personal content: design-system/ ──────────────────────────
+design-system/**
+!design-system/
+!design-system/**/
+!design-system/.gitkeep
+!design-system/**/.gitkeep
+!design-system/README.md
+
+# ── Personal content: assets/ (logos, photos, screenshots…) ───
+assets/**
+!assets/
+!assets/**/
+!assets/.gitkeep
+!assets/**/.gitkeep
+!assets/README.md
+
+# ── Runtime outputs (per-project content) ─────────────────────
+output/approved/**
+output/carousels/**
+output/exports/**
+output/revisions/**
+output/reviews/**
+out/**
+!output/**/.gitkeep
+!out/.gitkeep
+
+# ── GrowthOS runtime artifacts ────────────────────────────────
 .growthOS/
-out/
+.growthos/
 
-# Python
+# ── Playwright (browser automation artifacts & sessions) ──────
+.playwright/
+playwright-report/
+playwright/.cache/
+playwright/.auth/
+test-results/
+storage-state.json
+.auth.json
+chrome-profile/
+**/chrome-profile/
+*.webm
+*.har
+trace.zip
+
+# ── Python ────────────────────────────────────────────────────
 __pycache__/
 *.py[cod]
 *$py.class
@@ -19,22 +83,25 @@ build/
 *.egg
 .venv/
 venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
 
-# Node
+# ── Node ──────────────────────────────────────────────────────
 node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
-# Epic executor artifacts
+# ── Epic executor / misc tooling ──────────────────────────────
 .epic-executor/
 
-# Test cache
-.pytest_cache/
-
-# IDE
+# ── IDE ───────────────────────────────────────────────────────
 .vscode/
 .idea/
 *.swp
 *.swo
 
-# OS
+# ── OS ────────────────────────────────────────────────────────
 .DS_Store
 Thumbs.db

@@ -64,6 +64,7 @@ Subcommands:
   analyze   — Competitive analysis, market research
   research  — Deep research and topic exploration
   report    — Performance metrics and summaries
+  viral     — Analyze a viral piece and extract patterns to the index
   setup     — Configure brand voice and preferences
 
 Tip: Just describe what you need in natural language — the CMO will route it.
@@ -85,6 +86,14 @@ If the first word of the user's input matches a known subcommand, route DIRECTLY
 | `report` | intelligence-analyst agent |
 | `visual` or `design` | visual-designer agent |
 | `landing` | growth-engineer agent |
+| `viral` | viral-analyzer skill (invokes Maestri → Orquestrador) |
+| `review` | Launch local Flask review dashboard at http://localhost:5050 |
+| `ship` | Master pipeline: publish all approved carousels to Instagram |
+| `ig-setup` | Instagram Graph API one-time setup wizard |
+| `free-content` | Pull material from Educational Team via Maestri, generate carousels |
+| `revise` | Process pending carousel revisions (dispatches UiUX Expert via Maestri) |
+| `caption` | Generate caption.md for an approved carousel folder |
+| `export` | Export carousel HTML → PNG 1080x1080 via Playwright |
 | `setup` | Run onboarding/setup flow |
 
 ---
@@ -296,9 +305,9 @@ Default: /grow report (without period) generates a monthly report.
 
 **Optional flags:**
 - `--style [style]` — Visual style (e.g., minimal, bold, gradient, dark)
-- `--slides [number]` — Number of slides (3-10, default 7)
+- `--slides [number]` — Number of slides (3-10, default 8)
 - `--type [type]` — Carousel type (educational, storytelling, tips, listicle, case-study)
-- `--dim [dimensions]` — Slide dimensions (e.g., 1080x1350, 1080x1080)
+- `--dim [dimensions]` — Slide dimensions (default `1080x1350` portrait 4:5 IG-optimal; also accepts `1080x1080` square legacy)
 
 **Argument parsing:**
 - `topic` (required) — The subject for the carousel. Everything after "carousel" (and any flags) is the topic.
@@ -322,6 +331,186 @@ Examples:
 ```
 
 **Delegation:** Load `agents/carousel-designer/AGENT.md`, pass topic, flags, and brand-voice context.
+
+---
+
+#### Subcommand: `viral`
+
+**Syntax:** `/grow viral [optional: URL or filename]`
+**Skill:** `viral-analyzer` (at `~/.claude/skills/viral-analyzer`)
+**Pipeline:** Maestri → Orquestrador - Educational team → pattern extraction → GrowthOS index
+
+**Argument parsing:**
+- No args → process the most recent file in `~/Downloads/Virais/`
+- URL (TikTok, Instagram Reel, YouTube, Twitter/X) → dispatch competitor viral analysis
+- Filename only → match against `~/Downloads/Virais/{name}`
+
+**If invoked without arguments AND `~/Downloads/Virais/` is empty**, show:
+```
+Usage: /grow viral [URL or filename]
+
+Process a viral piece of content. Extracts patterns into growthOS/voice/virais/
+and updates the master index that every content agent reads before generating.
+
+Examples:
+  /grow viral                               # uses most recent file in ~/Downloads/Virais/
+  /grow viral reel-meu-que-bombou.mp4      # specific local file
+  /grow viral https://www.tiktok.com/@nick/video/12345   # competitor URL
+  /grow viral https://www.instagram.com/reel/abc       # competitor URL
+
+Before dispatching, you will be asked for metadata:
+views, likes, shares, saves, comments, creator handle, platform, posted date,
+and why you consider it viral. Provide what you have — missing fields become [não informado].
+
+Output:
+  - growthOS/voice/virais/VIRAL-NN-slug.md     (individual dossier)
+  - growthOS/voice/virais/INDEX.md             (master index updated)
+  - growthOS/voice/virais/PATTERNS/{category}.md (patterns aggregated)
+```
+
+**Delegation:** Invoke the `viral-analyzer` skill via the Skill tool. That skill owns the full pipeline:
+1. Load Maestri terminals
+2. Write a brief file to `growthOS/voice/virais/_briefs/`
+3. Dispatch to `Orquestrador - Educational team` via `maestri ask` (compact prompt pointing to brief)
+4. Wait for completion, verify dossier exists
+5. Update `INDEX.md` and the relevant `PATTERNS/{category}.md`
+6. Report back with dossier path, category, voice_fit, top 3 patterns
+
+All future `/grow create`, `/grow carousel`, and content generation runs will automatically read the updated viral index before generating — the loop closes.
+
+---
+
+#### Subcommand: `review`
+
+**Syntax:** `/grow review`
+**Script:** `growthOS/review-server/server.py`
+
+Launches the Flask local review dashboard. Opens http://localhost:5050 in default browser. The dashboard lists all `carousels-v*.html` files in `growthOS/design-system/` and lets user approve/reject each carousel with keyboard shortcuts (A=approve, R=reject, →=next).
+
+On approve, auto-triggers: export PNG → organize folder → caption-writer → update PROFILE.md.
+On reject, auto-logs to REJECTED.md with tag + optional reason → update PROFILE.md.
+
+**Run:**
+```bash
+python growthOS/review-server/server.py
+```
+
+---
+
+#### Subcommand: `ship`
+
+**Syntax:** `/grow ship [--dry-run] [--date YYYY-MM-DD]`
+**Script:** `growthOS/publisher/ig_publisher.py` (batch mode)
+
+Master pipeline — publishes all approved carousels that haven't been posted yet to Instagram. Scans `growthOS/output/approved/{date}/` for folders where `post-status.json` has `status: draft` and `caption_written: true`, then pipes each through `ig_publisher.py`.
+
+**Examples:**
+```bash
+/grow ship                              # publishes today's approved carousels
+/grow ship --date 2026-04-09            # publishes for specific date
+/grow ship --dry-run                    # prints what would be posted without actually posting
+```
+
+**Delegation:** Iterates over approved folders, calls `publisher/ig_publisher.py --folder X` for each. Updates each `post-status.json` on success.
+
+---
+
+#### Subcommand: `ig-setup`
+
+**Syntax:** `/grow ig-setup`
+**Script:** `growthOS/publisher/setup_wizard.py`
+
+One-time interactive wizard to configure Meta Graph API credentials for Instagram publishing. Guides user through:
+1. Instagram Business/Creator account setup
+2. Facebook Page creation + IG linking
+3. Meta Developer App creation
+4. Permissions setup (instagram_content_publish + 4 more)
+5. Short-lived token generation via Graph API Explorer
+6. Long-lived token exchange (60 days)
+7. IG Business Account ID discovery
+8. Save credentials to `~/.growthos/ig-credentials.json` (chmod 600)
+
+**Run:**
+```bash
+python growthOS/publisher/setup_wizard.py
+```
+
+---
+
+#### Subcommand: `revise`
+
+**Syntax:** `/grow revise [--cid cXX] [--file carousels-vN.html] [--dry-run]`
+**Script:** `growthOS/scripts/process-revision.py`
+
+Processa a fila de revisões pendentes criadas pelo botão REVISE do dashboard. Agrupa por arquivo fonte, monta um **MASTER REVISION BRIEF** listando aprovados + revisões + rejeitados, dispara o UiUX Expert via Maestri pra gerar `carousels-vN-rev{K}.html` contendo aprovados + revisados (rejeitados excluídos), e move as revisões de `pending` pra `processing` na queue.
+
+**Filtros:**
+- `--cid c02` — processa só uma revisão específica
+- `--file carousels-v1.html` — processa só revisões desse arquivo
+- `--dry-run` — mostra o que faria sem despachar
+
+**Pipeline:**
+1. Lê `output/revisions/queue.json` (revisões pendentes)
+2. Lê `output/reviews/reviews.json` (status atual de cada carousel)
+3. Pra cada arquivo fonte com revisões pendentes:
+   - Determina próximo `revN` (increment do maior existente)
+   - Monta `design-system/revisions/MASTER-REVISION-{stem}-rev{N}-{ts}.md`
+   - Dispatches `maestri ask "UiUX Expert"` com prompt compacto apontando pro brief
+4. Move revisões `pending → processing` na queue
+5. Atualiza `REVISIONS.md` com o path de saída
+
+Quando o UiUX Expert terminar, o arquivo novo aparece em `design-system/` e você re-revisa no dashboard.
+
+**Examples:**
+```bash
+/grow revise                          # tudo que tá pending
+/grow revise --cid c02                # só o c02
+/grow revise --file carousels-v1.html # só revisões do v1
+/grow revise --dry-run                # testa sem despachar
+```
+
+---
+
+#### Subcommand: `free-content`
+
+**Syntax:** `/grow free-content [source]`
+**Docs:** `growthOS/commands/grow/FREE-CONTENT.md`
+
+Bridge from Educational Team (TIM) to GrowthOS. Dispatches `Orquestrador - Educational team` via Maestri to transcribe a lesson/video and extract viral chunks, then pipes each chunk into the normal carousel pipeline via `content-factory` skill.
+
+**Examples:**
+```bash
+/grow free-content
+/grow free-content "última aula sobre 3 Camadas da Maestria"
+/grow free-content --source ~/educational-team/lessons/aula-05.md
+```
+
+---
+
+#### Subcommand: `export`
+
+**Syntax:** `/grow export <html-file> [--carousel cid]`
+**Script:** `growthOS/scripts/export-carousel.mjs`
+
+Exports a carousel HTML to 1080×1080 PNGs via Playwright headless Chromium. Output goes to `growthOS/output/carousels/{stem}/{cid}/slides/`.
+
+```bash
+node growthOS/scripts/export-carousel.mjs growthOS/design-system/carousels-v3.html
+node growthOS/scripts/export-carousel.mjs growthOS/design-system/carousels-v3.html --carousel c04
+```
+
+---
+
+#### Subcommand: `caption`
+
+**Syntax:** `/grow caption <approved-folder>`
+**Agent:** `caption-writer`
+
+Generates an Instagram caption for an already-approved carousel folder. Reads voice + preferences + metadata and writes `caption.md` with hook, teaser, CTA, hashtags, first comment.
+
+```bash
+/grow caption growthOS/output/approved/2026-04-08/c04-preco
+```
 
 ---
 

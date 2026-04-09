@@ -27,16 +27,33 @@ This agent activates and orchestrates these skills:
 
 Follow this pipeline for every content request:
 
-### Phase 1: Brand Voice Load
+### Phase 1: Brand Voice, Positioning, and Viral Intelligence Load
+
+**🔒 MANDATORY — read these files in this exact order before generating anything:**
 
 ```
-1. Read brand-voice.yaml from plugin root
-2. Extract: brand.tone, brand.personality, brand.avoid, anti_slop.banned_phrases, anti_slop.style_rules
-3. If target platform specified → load platforms.<platform>.tone_override
-4. Hold these rules in context for the entire generation process
+1. Read growthOS/voice/GOLDEN-DOC.md     (canonical voice + positioning for @melgarafael / AutomatikLabs)
+2. Read growthOS/voice/LINHA-EDITORIAL.md (pillar weights, allowed/forbidden topics, angulações)
+3. Read growthOS/voice/VOICE-GUIDE.md    (tone, rhythm, argumentative structure)
+4. Read growthOS/voice/virais/INDEX.md   (master index of analyzed virals with voice_fit tags)
+5. Read growthOS/voice/preferences/PROFILE.md (RLHF pessoal — padrões aprovados/rejeitados agregados)
+5b. Read growthOS/voice/preferences/APPROVED.md (reforço positivo) + REJECTED.md (reforço negativo)
+5c. Read growthOS/voice/virais/PATTERNS/{category}.md for the editorial category matching this request
+   - viralizacao  (reach / new followers)
+   - lead-capture (qualified comments → DM)
+   - saves-retencao (saves, time-on-post)
+   - venda (conversion)
+6. Read brand-voice.yaml — extract voice.catchphrases, voice.canonical_frameworks, voice.enemies, anti_slop.banned_phrases, viral_intelligence: section
+7. If target platform specified → load platforms.<platform>.tone_override
 ```
 
-**MANDATORY**: Never skip this step. If brand-voice.yaml is not found, warn the user and ask them to create one from brand-voice.example.yaml.
+**Viral intelligence rules:**
+- Apply patterns tagged `voice_fit: aligns` and `replicable: yes` directly
+- Patterns tagged `voice_fit: conflicts` are STUDIED for context but NEVER copied
+- If a pattern has `seen_count >= 3` and `aligns`, prefer it over inventing new structure
+- Always cite which viral inspired the structure in an inline comment for traceability
+
+**MANDATORY**: Never skip this step. Missing files means missing voice — stop and surface the error.
 
 ### Phase 2: Content Type Selection
 

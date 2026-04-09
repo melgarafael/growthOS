@@ -22,48 +22,76 @@ GrowthOS turns Claude Code into a full-stack growth engine: strategy, content cr
 
 ## Installation
 
-### Option 1: Claude Code Marketplace (Recommended)
+> GrowthOS is distributed **only via `git clone`** — it is not published on the Claude Code marketplace. The `install.sh` script wires the cloned repo into `~/.claude/plugins/growthOS` so Claude Code discovers every skill, agent, command, and hook as a real slash command (`/grow`, `/growthOS:<skill>`).
+
+### 1. Clone and install
 
 ```bash
-claude plugin install growthOS
-```
-
-### Option 2: Install from GitHub
-
-```bash
-# Clone the repository
 git clone https://github.com/melgarafael/growthOS.git
-
-# Install as Claude Code plugin
-claude plugin add ./growthOS
+cd growthOS
+./install.sh
 ```
 
-### Option 3: Docker (for MCP servers)
+What the installer does:
+
+- Creates a symlink `~/.claude/plugins/growthOS → <your clone>` (standard Claude Code plugin discovery path).
+- Copies `brand-voice.example.yaml` → `brand-voice.yaml` if you don't have one yet.
+- Prints next steps.
+
+After it finishes, **restart Claude Code** (or open a new session) so the new plugin is loaded.
+
+### 2. (Optional) Python & Node dependencies
+
+Only required if you plan to use the MCP servers, the Remotion video engine, or the Instagram publisher:
 
 ```bash
-cd growthOS
+# Python shared library (MCP servers, publisher, scripts)
+pip install -e shared-lib/
+
+# Node dependencies (Remotion, carousel export)
+npm install
+```
+
+### 3. (Optional) Docker for MCP servers
+
+If you want the MCP servers running in containers:
+
+```bash
 cp .env.example .env
 # Edit .env with your API keys
-
 docker-compose up -d
-docker-compose ps
 ```
 
-### Post-Installation Setup
+### 4. Run the onboarding wizard
 
-After installing, run the onboarding wizard:
+Inside Claude Code:
 
 ```
 /grow setup
 ```
 
-This will guide you through:
+The wizard will guide you through:
 1. Setting your brand name and tagline
 2. Choosing your tone of voice
 3. Selecting your industry
 4. Configuring target platforms
 
-The wizard creates a `brand-voice.yaml` file that all agents use to stay on-brand.
+It writes to `brand-voice.yaml`, which all agents read to stay on-brand. That file is **gitignored** so your personal brand voice never ends up in the repo.
+
+### Uninstall
+
+```bash
+rm ~/.claude/plugins/growthOS
+```
+
+### Troubleshooting — slash commands not showing up
+
+If `/grow` or `/growthOS:<skill>` do not appear after install:
+
+1. Confirm the symlink exists: `ls -la ~/.claude/plugins/growthOS`
+2. Confirm the manifest: `cat ~/.claude/plugins/growthOS/.claude-plugin/plugin.json`
+3. Fully restart Claude Code (not just reload — exit the session and reopen).
+4. Inside Claude Code, run `/help` to list loaded plugins.
 
 ---
 
@@ -305,19 +333,35 @@ See [SECURITY.md](SECURITY.md) for the responsible disclosure policy.
 ### Setup
 
 ```bash
-# Clone
+# Clone and wire into Claude Code
 git clone https://github.com/melgarafael/growthOS.git
 cd growthOS
+./install.sh
 
-# Install Python shared library (development mode)
+# Python shared library (development mode)
 pip install -e shared-lib/
 
-# Install Node.js dependencies (for Remotion)
+# Node.js dependencies (Remotion, carousel export)
 npm install
 
 # Run tests
 cd shared-lib && pytest
 ```
+
+### What lives in the repo vs. what stays local
+
+GrowthOS ships the **structure** needed to run on any project, but per-project content is gitignored so your personal brand never leaks into the repo. Cloners get empty folders (preserved via `.gitkeep`) and fill them in locally.
+
+| Path | Structure committed? | Content committed? |
+|------|----------------------|--------------------|
+| `voice/` (golden doc, transcriptions, virals, preferences) | yes | **no — personal** |
+| `design-system/` (briefs, HTML, revisions) | yes | **no — personal** |
+| `assets/` (logos, photos, screenshots, icons) | yes | **no — personal** |
+| `brand-voice.yaml` | example only | **no — personal** |
+| `output/{approved,carousels,exports,reviews,revisions}` | yes | **no — runtime** |
+| `out/` (rendered videos) | yes | **no — runtime** |
+| Playwright artifacts, browser profiles, `.growthos/` | — | **no — runtime** |
+| `skills/`, `agents/`, `commands/`, `hooks/`, `mcp-servers/`, `remotion/`, `shared-lib/`, `templates/` | yes | **yes — reusable framework** |
 
 ### Contributing
 

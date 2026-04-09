@@ -5,6 +5,21 @@ description: Persuasive copywriting using AIDA, PAS, 4U headline formulas, CTA p
 
 # Copywriting Skill
 
+## 🔒 MANDATORY — Read before generating any copy
+
+Before producing any line of copy, read in this order:
+
+1. `growthOS/voice/GOLDEN-DOC.md` — canonical voice for @melgarafael / AutomatikLabs
+2. `growthOS/voice/virais/INDEX.md` — master viral index
+3. `growthOS/voice/virais/PATTERNS/{category}.md` for the editorial category matching the request (viralizacao / lead-capture / saves-retencao / venda)
+4. `brand-voice.yaml` sections: `voice`, `anti_slop`, `viral_intelligence`
+
+**Viral intelligence rules:**
+- Apply patterns tagged `voice_fit: aligns` directly
+- NEVER copy patterns tagged `voice_fit: conflicts`, even if they worked elsewhere
+- Prefer high-`seen_count` aligned patterns over inventing new structure
+- Cite the viral source in an inline comment for traceability
+
 ## Trigger Conditions
 
 Use this skill when the user asks to:

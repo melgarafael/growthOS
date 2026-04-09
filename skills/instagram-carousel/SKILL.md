@@ -7,6 +7,23 @@ description: Instagram carousel expertise — 6 carousel structures, slide-by-sl
 
 Specialized knowledge base for creating high-performing Instagram carousels. Covers structure selection, slide-by-slide content architecture, visual design rules, algorithm optimization, and engagement mechanics. This skill is consumed by the carousel-designer agent and integrates with the copywriting and platform-mastery skills.
 
+## 🔒 MANDATORY — Read before generating any carousel
+
+Before producing any carousel structure, read in this order:
+
+1. `growthOS/voice/GOLDEN-DOC.md` — canonical voice for @melgarafael / AutomatikLabs
+2. `growthOS/voice/LINHA-EDITORIAL.md` — pillars, angulações
+3. `growthOS/voice/virais/INDEX.md` — master viral index
+4. `growthOS/voice/virais/PATTERNS/{category}.md` for the editorial category of the request (viralizacao / lead-capture / saves-retencao / venda)
+5. `growthOS/design-system/DESIGN-SYSTEM.md` — visual DS (default lime-geist variant)
+6. `brand-voice.yaml` sections: `voice`, `anti_slop`, `viral_intelligence`, `design_system`
+
+**Viral intelligence rules:**
+- Apply patterns tagged `voice_fit: aligns` and `replicable: yes` directly
+- NEVER copy patterns tagged `voice_fit: conflicts`
+- Patterns with `seen_count >= 3` and aligned voice have priority
+- Each carousel cites the inspiring viral in a comment for traceability
+
 ---
 
 ## Trigger Conditions

@@ -32,13 +32,98 @@ Follow this pipeline for every carousel request. Each phase produces a structure
 
 Generate slide-by-slide content using copywriting frameworks and platform knowledge.
 
+**🔒 MANDATORY VOICE, POSITIONING & VIRAL INTELLIGENCE**
+
+Before generating any content, you **MUST**:
+
+1. Read `growthOS/voice/GOLDEN-DOC.md` — canonical source for tone, bordões, vocabulary, enemies, pillars, and product positioning for @melgarafael / Rafael Melgaço / AutomatikLabs.
+2. Read `growthOS/voice/LINHA-EDITORIAL.md` — for pillar weights, allowed/forbidden topics, and angulação.
+3. Read `growthOS/voice/VOICE-GUIDE.md` — for tone, rhythm, argumentative structure.
+4. Read `growthOS/voice/virais/INDEX.md` — master index of all analyzed virals (patterns ranked by performance + voice_fit tag).
+5. Read `growthOS/voice/virais/PATTERNS/{category}.md` for the editorial category matching the current request (viralizacao, lead-capture, saves-retencao, or venda). Apply `replicable: yes` and `voice_fit: aligns` patterns; avoid `voice_fit: conflicts` patterns even if they worked for other creators.
+6. Read `growthOS/voice/preferences/PROFILE.md` — RLHF pessoal do Rafael (padrões aprovados + rejeitados com stats).
+7. Read `growthOS/voice/preferences/APPROVED.md` — padrões com reforço positivo (replicar).
+8. Read `growthOS/voice/preferences/REJECTED.md` — padrões com reforço negativo (evitar).
+9. Read `growthOS/assets/INDEX.md` — asset library (pra auto-sugerir logos/screenshots nos slides).
+10. Read `growthOS/voice/preferences/REVISIONS.md` — histórico de ajustes pedidos (padrões recorrentes de revisão = padrões a evitar preventivamente).
+11. Consult `brand-voice.yaml` sections: `voice`, `anti_slop`, `viral_intelligence`, `learning_loop`, `assets` for enforcement.
+
+## 🔁 Revision Mode
+
+When dispatched via `/grow revise` (through `scripts/process-revision.py`), you operate in **Revision Mode**. The master brief at `growthOS/design-system/revisions/MASTER-REVISION-*.md` tells you:
+
+- Which carousels are **APPROVED** — copy them EXACTLY from the original HTML, do NOT touch them
+- Which carousels need **REVISION** — regenerate ONLY the affected slides, preserving the rest
+- Which carousels are **REJECTED** — drop them entirely from the output
+
+Output a cumulative versioned file `carousels-{stem}-rev{N}.html` containing approved ∪ revised. Rejected are never included.
+
+**Revision rules:**
+- Preserve original CSS, wrapper, typography, and DS tokens — only the specific slides change
+- Read the user's literal instructions for each revision — do exactly what they asked, nothing more
+- If a revision has tag `copy_numero` or `fonte_verificar`, NEVER invent a replacement number/fact — use `[VERIFICAR]` placeholder and ask the user
+- The revised section keeps the same `data-carousel={cid}` attribute for dashboard tracking
+- Increment a `data-rev={N}` attribute on revised sections so the dashboard shows the revision round
+
+**Asset auto-selection (Phase 2 — hybrid mode com Claude Vision):**
+
+Cada asset em `assets/_meta/*.meta.yaml` agora tem um bloco `vision:` preenchido por `scripts/asset-vision.py` via Claude Vision. Esse bloco contém:
+- `subject` — o que o asset mostra (descrição objetiva em 1 frase)
+- `visual_type` — logo_monochrome, screenshot_ui, photo_person, icon, diagram, etc.
+- `mood` — adjetivos de tom (technical, minimal, futuristic)
+- `brand_fit_score` (0.0-1.0) — quanto combina com a marca
+- `best_placement` — lista de {slide_type, position, size, reason} — onde usar e por quê
+- `suggested_topics` — temas de carrossel onde esse asset brilha
+- `do_not_use_when` — contextos a evitar
+- `text_overlay_ok` — se aceita texto em cima
+- `crop_hint` — onde fica o foco se precisar cortar
+- `accessibility_alt` — alt text curto
+
+**Processo obrigatório de seleção de asset:**
+
+1. Pra cada slide que precisa de asset, extraia 2-5 keywords do conteúdo
+2. Leia todos os sidecars relevantes e compare contra `vision.suggested_topics` + `vision.best_placement.slide_type` — match semântico, não só tag de nome de arquivo
+3. Filtre por `vision.brand_fit_score >= 0.7` (exceto se brief tiver override explícito)
+4. Posicione usando `vision.best_placement` (position + size + reason)
+5. Se o slide já tem texto pesado, cheque `vision.text_overlay_ok` — se for `false`, procure outro asset ou mude a posição pra não sobrepor
+6. Pra slides filosóficos/confessionais, NUNCA use asset com `visual_type: illustration` ou `mood` motivacional
+7. Se brief tiver override explícito ("no slide N usa asset X"), respeite o override MAS ainda leia o `vision` block pra decidir posição e tamanho ótimos
+8. Se nenhum asset matchar ou `brand_fit_score` de todos < 0.7, use SVG placeholder inline (fallback atual)
+
+**Exemplo de raciocínio correto:**
+
+Slide C04-S6 "Minha stack: Claude Code + Maestri" precisa de logo Claude Code.
+
+- Lê `assets/_meta/claude-code.svg.meta.yaml`
+- `vision.subject`: "Minimal chevron-block icon representing CLI prompt"
+- `vision.best_placement`: `[{slide_type: "demo", position: "top-right", size: "small", reason: "logo marks brand without competing with headline"}]`
+- `vision.brand_fit_score`: 0.95
+- → usa top-right small no S6. CSS: `position: absolute; top: 104px; right: 104px; width: 120px`
+
+Sem esse raciocínio, o agente fica chutando posição e tamanho. Com ele, cada asset entra no lugar certo pela razão certa.
+
+**7 regras de ouro (enforced):**
+
+1. Toda peça de conteúdo é porta de entrada pro produto AutomatikLabs. Se não amarra na jornada do aluno, não entra.
+2. Renda real é o norte (Kirkpatrick L4). Sem conexão com "renda gerada" = desvio da tese.
+3. Vocabulário proibido = BLOQUEIO. Jamais usar "bot", "chatbot", "robô", "assistente virtual", "IA mágica".
+4. Framework canônico nomeado — conteúdo de pilar 1-4 deve citar ao menos 1 (3 Camadas da Maestria, 3 Pilares, 7 Passos, 3 Cs, Cubo 3D, Backward Design, Kirkpatrick L4, Princípio Unificador Método+Construção+Negociação).
+5. Abre com tese, não com preamble. Fecha com princípio, não "salva pra depois".
+6. Desafia sem humilhar. Exigente, nunca grosseiro.
+7. Anti-receita. Jamais prometa atalho, virada de chave, fórmula mágica, ou "aprenda IA em X dias".
+
+**Tom obrigatório:** doutrinal, arquitetural, exigente-com-respeito, anti-receita, obcecado por resultado real. Professor-arquiteto conversando com colega-construtor. NUNCA guru falando pra fã.
+
 ```
-1. Read brand-voice.yaml from plugin root
-2. Extract: brand.tone, brand.personality, brand.avoid, anti_slop.banned_phrases
-3. Determine carousel type (from user request or auto-select based on topic)
-4. Apply copywriting framework (AIDA for educational, PAS for problem-solving)
-5. Generate slide_plan YAML with content for each slide
-6. Run anti-slop validation on all text
+1. READ growthOS/voice/GOLDEN-DOC.md (MANDATORY)
+2. READ growthOS/voice/LINHA-EDITORIAL.md (MANDATORY)
+3. Read brand-voice.yaml — extract voice.catchphrases, voice.canonical_frameworks, voice.enemies, voice.content_pillars
+4. Select content pillar (1-5) based on topic, weight distribution from LINHA-EDITORIAL.md
+5. Select carousel type (listicle, contrarian, framework, etc.)
+6. Apply copywriting framework (AIDA for educational, PAS for problem-solving)
+7. Generate slide_plan YAML — ensure at least 1 canonical framework is named, no forbidden vocabulary, aligned with tone
+8. Run anti-slop validation (blocks on any banned_phrase in brand-voice.yaml)
+9. Validate against 7 regras de ouro — reject and regenerate if any rule fails
 ```
 
 **Output: `slide_plan` YAML**
@@ -80,13 +165,23 @@ slide_plan:
 
 Select visual style and define the complete design specification.
 
+**🔒 MANDATORY DESIGN SYSTEM**
+
+Before generating `design_spec`, you **MUST** read `growthOS/design-system/DESIGN-SYSTEM.md`. This file is the canonical source of truth for ALL carousel visuals. Do NOT invent colors, typography, or layouts outside of this DS unless the user passes `--style custom`.
+
+Variant selection logic:
+1. If user passed `--ds {variant}` (e.g. `--ds lime-geist`, `--ds yellow-grotesk`, `--ds cyan-bricolage`), use that variant.
+2. Otherwise, consult the "Mapeamento por tipo de carrossel" table in `DESIGN-SYSTEM.md` and pick the variant matching the carousel type.
+3. Default fallback: **`lime-geist`** (Variant A).
+
+Default dimensions are **1080x1350 (portrait 4:5, Instagram-optimal)** unless user explicitly passes `--dim`. Padding is **104px** (112px top/bottom), alignment **left**, accent color used ONLY for keywords/numbers/CTA. Legacy files from before 2026-04-08 (v1/v2/v3/pc-super-ia) are 1080x1080 — all NEW carousels must use 1080x1350.
+
 ```
-1. Determine style (auto-select from brand tone or use explicit --style flag)
-2. Extract brand colors from brand-voice.yaml
-3. Define typography (headline font, body font, sizes)
-4. Define layout (spacing, alignment, icon placement)
-5. Set dimensions (default: 1080x1350 portrait)
-6. Generate design_spec YAML
+1. READ growthOS/design-system/DESIGN-SYSTEM.md (MANDATORY)
+2. Select variant per logic above
+3. Extract tokens from the chosen variant in DESIGN-SYSTEM.md
+4. Generate design_spec YAML using EXACT tokens from the DS (no invention)
+5. Cross-reference brand-voice.yaml for handle/watermark only
 ```
 
 **Output: `design_spec` YAML**
