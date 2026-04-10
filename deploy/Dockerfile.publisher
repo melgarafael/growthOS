@@ -1,0 +1,35 @@
+# GrowthOS Instagram Publisher — Production Dockerfile
+# Includes Playwright + Chromium for browser automation
+FROM python:3.11-slim
+
+RUN groupadd -r growthos && useradd -r -g growthos -d /app -s /sbin/nologin growthos
+
+WORKDIR /app
+
+# System deps for Playwright
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Python deps
+RUN pip install --no-cache-dir \
+    playwright>=1.40 \
+    httpx>=0.27
+
+# Install Chromium in a shared path accessible by non-root user
+ENV PLAYWRIGHT_BROWSERS_PATH=/opt/playwright-browsers
+RUN mkdir -p /opt/playwright-browsers \
+    && playwright install chromium --with-deps \
+    && chown -R growthos:growthos /opt/playwright-browsers
+
+# Copy publisher code
+COPY publisher/ /app/publisher/
+
+# Create state directory
+RUN mkdir -p /app/state /app/approved \
+    && chown -R growthos:growthos /app
+
+USER growthos
+
+# No port exposed — triggered via docker exec from ship-queue
+CMD ["python", "-c", "import time; print('IG Publisher ready — waiting for queue triggers'); time.sleep(999999)"]

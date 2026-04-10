@@ -1,0 +1,44 @@
+# GrowthOS Review Dashboard — Production Dockerfile
+FROM python:3.11-slim AS builder
+
+WORKDIR /build
+RUN pip install --no-cache-dir --prefix=/install \
+    flask>=3.0 \
+    gunicorn>=22.0
+
+FROM python:3.11-slim
+
+RUN groupadd -r growthos && useradd -r -g growthos -d /app -s /sbin/nologin growthos
+
+WORKDIR /app
+
+COPY --from=builder /install /usr/local
+
+# Copy review server
+COPY review-server/ /app/review-server/
+# Copy scripts needed by review server
+COPY scripts/ /app/growthOS/scripts/
+
+# Create required directories
+RUN mkdir -p /app/growthOS/output/reviews \
+             /app/growthOS/output/approved/queue \
+             /app/growthOS/output/revisions \
+             /app/growthOS/voice/preferences \
+             /app/growthOS/design-system/revisions \
+    && chown -R growthos:growthos /app
+
+USER growthos
+
+EXPOSE 5050
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:5050/')"
+
+CMD ["gunicorn", \
+     "--bind", "0.0.0.0:5050", \
+     "--workers", "2", \
+     "--threads", "4", \
+     "--timeout", "120", \
+     "--access-logfile", "-", \
+     "--error-logfile", "-", \
+     "review-server.server:app"]

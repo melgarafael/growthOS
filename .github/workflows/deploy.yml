@@ -1,0 +1,105 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "growthOS/**"
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+
+jobs:
+  # ─── CI Gate (reuse existing) ───────────────────────────
+  ci:
+    uses: ./.github/workflows/ci.yml
+
+  # ─── Build & Push Images ────────────────────────────────
+  build:
+    needs: ci
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      matrix:
+        include:
+          - name: mcp-social-publish
+            dockerfile: growthOS/Dockerfile
+            context: growthOS
+            target: mcp-social-publish
+          - name: mcp-social-discover
+            dockerfile: growthOS/Dockerfile
+            context: growthOS
+            target: mcp-social-discover
+          - name: mcp-obsidian-vault
+            dockerfile: growthOS/Dockerfile
+            context: growthOS
+            target: mcp-obsidian-vault
+          - name: review-server
+            dockerfile: growthOS/deploy/Dockerfile.review
+            context: growthOS
+            target: ""
+          - name: ig-publisher
+            dockerfile: growthOS/deploy/Dockerfile.publisher
+            context: growthOS
+            target: ""
+          - name: ship-queue
+            dockerfile: growthOS/deploy/Dockerfile.queue
+            context: growthOS
+            target: ""
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push image
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.dockerfile }}
+          target: ${{ matrix.target || '' }}
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/growthos-${{ matrix.name }}:latest
+            ghcr.io/${{ github.repository_owner }}/growthos-${{ matrix.name }}:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ─── Deploy to VPS ─────────────────────────────────────
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          script: |
+            cd /opt/growthos/growthOS
+            git pull origin main
+            cd deploy
+            bash scripts/deploy.sh
+
+      - name: Verify deployment health
+        env:
+          DEPLOY_DOMAIN: ${{ secrets.DOMAIN }}
+        run: |
+          sleep 10
+          HTTP_CODE=$(curl -sS -o /dev/null -w "%{http_code}" --max-time 15 "https://${DEPLOY_DOMAIN}/health" || echo "000")
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "Health check failed: HTTP $HTTP_CODE"
+            exit 1
+          fi
+          echo "Deployment verified: HTTP $HTTP_CODE"

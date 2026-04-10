@@ -27,6 +27,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 GROWTHOS = REPO_ROOT / "growthOS"
 DESIGN_SYSTEM = GROWTHOS / "design-system"
 OUTPUT = GROWTHOS / "output"
+APPROVED = OUTPUT / "approved"
 REVIEWS_DIR = OUTPUT / "reviews"
 REVIEWS_FILE = REVIEWS_DIR / "reviews.json"
 PREFERENCES = GROWTHOS / "voice" / "preferences"
@@ -111,6 +112,13 @@ def run_script(cmd: list, cwd: Path = None) -> dict:
 # ─────────────────────────────────────────────────────────────────
 # Routes
 # ─────────────────────────────────────────────────────────────────
+
+@app.route("/assets/<path:filename>")
+def serve_asset(filename):
+    """Serve assets (logos, icons) so carousel HTML relative paths work."""
+    assets_dir = GROWTHOS / "assets"
+    return send_from_directory(str(assets_dir), filename)
+
 
 @app.route("/")
 def index():
@@ -703,23 +711,30 @@ def queue_page():
         status_color = {
             "pending": "#8A8A8A", "exporting": "#FFE600", "organizing": "#FFE600",
             "captioning": "#FFE600", "publishing": "#00F0FF", "done": "#B0FF3C",
-            "failed": "#FF6B6B", "skipped": "#5A5A5A",
+            "failed": "#FF6B6B", "skipped": "#5A5A5A", "scheduled": "#FF9F43",
         }.get(status, "#8A8A8A")
         title = item.get("title", "")[:70]
         source = item["source"]
         cid = item["cid"]
         post_url = item.get("post_url") or ""
         post_link = f'<a href="{post_url}" target="_blank" style="color:#B0FF3C;font-size:10px;">📎 post</a>' if post_url else ""
+        scheduled = item.get("scheduled_for") or ""
+        sched_badge = f'<span class="q-sched">🕐 {scheduled[:16].replace("T"," ")}</span>' if scheduled else ""
         rows_html += f"""
         <li class="q-item" data-idx="{i}" draggable="true">
           <div class="q-drag">⋮⋮</div>
           <div class="q-order">{i+1:02d}</div>
-          <div class="q-main">
-            <div class="q-title">{title}</div>
-            <div class="q-sub">{source} · {cid}</div>
+          <div class="q-main" onclick="toggleDetail({i}, event)">
+            <div class="q-title">{title} <span class="q-expand-icon">▸</span></div>
+            <div class="q-sub">{source} · {cid} {sched_badge}</div>
           </div>
           <div class="q-status" style="color:{status_color};">● {status}</div>
           <div class="q-actions">{post_link}</div>
+        </li>
+        <li class="q-detail" id="detail-{i}" style="display:none;">
+          <div class="q-detail-inner">
+            <div class="q-detail-loading">carregando...</div>
+          </div>
         </li>
         """
 
@@ -759,6 +774,25 @@ def queue_page():
         .q-sub { font-family:'Geist Mono',monospace; font-size:11px; color:#5A5A5A; }
         .q-status { font-family:'Geist Mono',monospace; font-size:11px; text-transform:uppercase; min-width:120px; text-align:right; }
         .q-actions { min-width:60px; text-align:right; }
+        .q-main { cursor:pointer; }
+        .q-expand-icon { font-size:10px; color:#5A5A5A; transition:transform 200ms; display:inline-block; }
+        .q-expand-icon.open { transform:rotate(90deg); color:#B0FF3C; }
+        .q-sched { font-size:10px; color:#FF9F43; margin-left:8px; }
+        .q-detail { list-style:none; margin-bottom:8px; }
+        .q-detail-inner { background:#0E0E0E; border:1px solid rgba(255,255,255,0.08); border-top:none; padding:20px; }
+        .q-detail-loading { color:#5A5A5A; font-family:'Geist Mono',monospace; font-size:12px; }
+        .q-slides-row { display:flex; gap:8px; overflow-x:auto; padding:8px 0; }
+        .q-slides-row img { width:120px; height:120px; object-fit:cover; border:1px solid rgba(255,255,255,0.1); flex-shrink:0; }
+        .q-caption-box { margin-top:12px; background:#111; border:1px solid rgba(255,255,255,0.06); padding:12px; font-family:'Geist Mono',monospace;
+          font-size:11px; color:#CCC; max-height:180px; overflow-y:auto; white-space:pre-wrap; line-height:1.5; }
+        .q-schedule-row { margin-top:16px; display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+        .q-schedule-row label { font-family:'Geist Mono',monospace; font-size:12px; color:#8A8A8A; }
+        .q-schedule-row input[type="datetime-local"] { padding:8px 12px; background:#111; color:#F5F5F5; border:1px solid rgba(255,255,255,0.2);
+          font-family:'Geist Mono',monospace; font-size:12px; }
+        .q-schedule-row button { padding:8px 16px; border:none; font-weight:700; font-family:inherit; font-size:11px; cursor:pointer; text-transform:uppercase; }
+        .q-schedule-row .btn-sched { background:#FF9F43; color:#0A0A0A; }
+        .q-schedule-row .btn-unsched { background:#333; color:#F5F5F5; }
+        .q-meta-row { margin-top:8px; font-family:'Geist Mono',monospace; font-size:10px; color:#5A5A5A; }
         .empty { color:#5A5A5A; font-family:'Geist Mono',monospace; font-size:13px; padding:40px; text-align:center; border:1px dashed rgba(255,255,255,0.1); }
         .log { margin-top:32px; background:#0E0E0E; border:1px solid rgba(255,255,255,0.1); padding:16px; font-family:'Geist Mono',monospace; font-size:11px; color:#8A8A8A; max-height:200px; overflow-y:auto; white-space:pre-wrap; }
         .log .ok { color:#B0FF3C; }
@@ -843,6 +877,142 @@ def queue_page():
           item.addEventListener('dragleave', () => item.classList.remove('drag-over'));
         });
 
+        // --- Expand / collapse detail panel ---
+        const detailCache = {};
+        async function toggleDetail(idx, event) {
+          if (event && event.target.closest('.q-drag')) return;
+          const panel = document.getElementById('detail-' + idx);
+          const icon = panel.previousElementSibling.querySelector('.q-expand-icon');
+          if (panel.style.display === 'none') {
+            panel.style.display = 'list-item';
+            if (icon) icon.classList.add('open');
+            if (!detailCache[idx]) {
+              try {
+                const r = await fetch('/api/queue/item/' + idx);
+                detailCache[idx] = await r.json();
+              } catch(e) {
+                panel.querySelector('.q-detail-inner').textContent = 'erro ao carregar';
+                return;
+              }
+            }
+            renderDetail(idx, detailCache[idx]);
+          } else {
+            panel.style.display = 'none';
+            if (icon) icon.classList.remove('open');
+          }
+        }
+
+        function renderDetail(idx, data) {
+          const panel = document.getElementById('detail-' + idx);
+          const inner = panel.querySelector('.q-detail-inner');
+          // Clear previous content safely
+          inner.textContent = '';
+
+          if (!data.ok) {
+            const err = document.createElement('div');
+            err.className = 'q-detail-loading';
+            err.style.color = '#FF6B6B';
+            err.textContent = 'dados não encontrados — rode PREPARE primeiro';
+            inner.appendChild(err);
+            return;
+          }
+
+          // Slides row
+          if (data.slides && data.slides.length) {
+            const row = document.createElement('div');
+            row.className = 'q-slides-row';
+            data.slides.forEach(url => {
+              const img = document.createElement('img');
+              img.src = url;
+              img.alt = 'slide';
+              img.loading = 'lazy';
+              row.appendChild(img);
+            });
+            inner.appendChild(row);
+          } else {
+            const noSlides = document.createElement('div');
+            noSlides.className = 'q-meta-row';
+            noSlides.textContent = 'nenhum slide exportado — rode PREPARE';
+            inner.appendChild(noSlides);
+          }
+
+          // Caption box (server already extracts "Post caption" section)
+          const captionBox = document.createElement('div');
+          captionBox.className = 'q-caption-box';
+          captionBox.textContent = data.caption || '(sem caption — rode PREPARE)';
+          inner.appendChild(captionBox);
+
+          // Schedule row
+          const schedRow = document.createElement('div');
+          schedRow.className = 'q-schedule-row';
+
+          const lbl = document.createElement('label');
+          lbl.textContent = 'agendar post:';
+          schedRow.appendChild(lbl);
+
+          const dtInput = document.createElement('input');
+          dtInput.type = 'datetime-local';
+          dtInput.id = 'sched-input-' + idx;
+          if (data.scheduled_for) dtInput.value = data.scheduled_for.slice(0, 16);
+          schedRow.appendChild(dtInput);
+
+          const btnSave = document.createElement('button');
+          btnSave.className = 'btn-sched';
+          btnSave.textContent = 'salvar agendamento';
+          btnSave.addEventListener('click', () => saveSchedule(idx));
+          schedRow.appendChild(btnSave);
+
+          const btnClear = document.createElement('button');
+          btnClear.className = 'btn-unsched';
+          btnClear.textContent = 'limpar';
+          btnClear.addEventListener('click', () => clearSchedule(idx));
+          schedRow.appendChild(btnClear);
+
+          inner.appendChild(schedRow);
+
+          // Meta row
+          const meta = document.createElement('div');
+          meta.className = 'q-meta-row';
+          meta.textContent = data.slide_count + ' slides · ' + data.source + ' · ' + data.cid;
+          inner.appendChild(meta);
+        }
+
+        async function saveSchedule(idx) {
+          const input = document.getElementById('sched-input-' + idx);
+          const val = input.value;
+          if (!val) { logLine('selecione data/hora primeiro', 'err'); return; }
+          const iso = new Date(val).toISOString();
+          const r = await fetch('/api/queue/schedule', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({idx: idx, scheduled_for: iso}),
+          });
+          const j = await r.json();
+          if (j.ok) {
+            logLine('✓ agendamento salvo: ' + val, 'ok');
+            detailCache[idx] = null;
+            setTimeout(() => location.reload(), 800);
+          } else {
+            logLine('✗ erro: ' + (j.error || 'unknown'), 'err');
+          }
+        }
+
+        async function clearSchedule(idx) {
+          const r = await fetch('/api/queue/schedule', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({idx: idx, scheduled_for: null}),
+          });
+          const j = await r.json();
+          if (j.ok) {
+            logLine('✓ agendamento removido', 'ok');
+            detailCache[idx] = null;
+            setTimeout(() => location.reload(), 800);
+          } else {
+            logLine('✗ erro: ' + (j.error || 'unknown'), 'err');
+          }
+        }
+
         async function prepare() {
           logLine('preparing queue: exporting PNGs + generating captions...');
           const r = await fetch('/api/queue/prepare', {method: 'POST'});
@@ -884,6 +1054,94 @@ def queue_page():
 @app.route("/api/queue/posting")
 def api_queue_posting_get():
     return jsonify(rebuild_posting_queue())
+
+
+@app.route("/api/queue/item/<int:idx>")
+def api_queue_item_detail(idx):
+    """Return detail for a single queue item: slides (as URLs), caption text, metadata."""
+    queue = load_posting_queue()
+    items = queue.get("items", [])
+    if idx < 0 or idx >= len(items):
+        return jsonify({"ok": False, "error": "index out of range"}), 404
+
+    item = items[idx]
+    source = item["source"]
+    cid = item["cid"]
+    approved_date = item.get("approved_date", str(date.today()))
+
+    # Find the approved folder
+    date_dir = APPROVED / approved_date
+    candidates = list(date_dir.glob(f"{cid}-*")) if date_dir.exists() else []
+    folder = candidates[0] if candidates else None
+
+    detail = {
+        "ok": True,
+        "source": source,
+        "cid": cid,
+        "title": item.get("title", cid),
+        "status": item.get("status", "pending"),
+        "scheduled_for": item.get("scheduled_for"),
+        "slides": [],
+        "caption": "",
+        "metadata": {},
+        "slide_count": 0,
+    }
+
+    if folder and folder.exists():
+        slides_dir = folder / "slides"
+        if slides_dir.exists():
+            slides = sorted(slides_dir.glob("*.png"))
+            detail["slides"] = [f"/api/queue/slide/{approved_date}/{folder.name}/{s.name}" for s in slides]
+            detail["slide_count"] = len(slides)
+
+        caption_file = folder / "caption.md"
+        if caption_file.exists():
+            import re as _re
+            raw = caption_file.read_text()
+            detail["caption_raw"] = raw
+            # Extract just the "Post caption" section for display
+            m = _re.search(r"## Post caption[^\n]*\n+(.+?)(?=\n## |\Z)", raw, _re.DOTALL)
+            detail["caption"] = m.group(1).strip() if m else raw[:800]
+
+        meta_file = folder / "metadata.json"
+        if meta_file.exists():
+            try:
+                detail["metadata"] = json.loads(meta_file.read_text())
+            except Exception:
+                pass
+
+    return jsonify(detail)
+
+
+@app.route("/api/queue/slide/<date_str>/<folder_name>/<filename>")
+def api_queue_slide(date_str, folder_name, filename):
+    """Serve a slide PNG from the approved folder."""
+    slides_dir = APPROVED / date_str / folder_name / "slides"
+    if not slides_dir.exists():
+        abort(404)
+    return send_from_directory(str(slides_dir), filename)
+
+
+@app.route("/api/queue/schedule", methods=["POST"])
+def api_queue_schedule():
+    """Set scheduled_for datetime on a queue item."""
+    data = request.get_json() or {}
+    idx = data.get("idx")
+    scheduled_for = data.get("scheduled_for")  # ISO string or null
+
+    if idx is None:
+        return jsonify({"ok": False, "error": "idx required"}), 400
+
+    queue = load_posting_queue()
+    items = queue.get("items", [])
+    if idx < 0 or idx >= len(items):
+        return jsonify({"ok": False, "error": "index out of range"}), 404
+
+    items[idx]["scheduled_for"] = scheduled_for
+    items[idx]["last_update"] = datetime.now().isoformat()
+    save_posting_queue(queue)
+
+    return jsonify({"ok": True, "idx": idx, "scheduled_for": scheduled_for})
 
 
 @app.route("/api/queue/reorder", methods=["POST"])

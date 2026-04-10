@@ -1,0 +1,19 @@
+# GrowthOS Ship Queue Orchestrator — Production Dockerfile
+FROM python:3.11-slim
+
+RUN groupadd -r growthos && useradd -r -g growthos -d /app -s /sbin/nologin growthos
+
+WORKDIR /app
+
+RUN pip install --no-cache-dir \
+    schedule>=1.2 \
+    httpx>=0.27
+
+COPY scripts/ship-queue.py /app/ship-queue.py
+
+RUN mkdir -p /app/approved \
+    && chown -R growthos:growthos /app
+
+USER growthos
+
+CMD ["python", "/app/ship-queue.py"]

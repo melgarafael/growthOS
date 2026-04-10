@@ -1,0 +1,72 @@
+# GrowthOS Production Caddyfile
+# Auto-SSL via Let's Encrypt, security headers, reverse proxy
+
+{
+	email {$ADMIN_EMAIL:admin@example.com}
+}
+
+{$DOMAIN:localhost} {
+	# ─── Security Headers ──────────────────────────────
+	header {
+		Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "SAMEORIGIN"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "camera=(), microphone=(), geolocation=()"
+		-Server
+		-X-Powered-By
+	}
+
+	# ─── Review Dashboard (auth protected) ─────────────
+	handle /dashboard* {
+		basicauth {
+			{$DASHBOARD_USER:admin} {$DASHBOARD_HASH}
+		}
+		reverse_proxy review-server:5050
+	}
+
+	# ─── Static assets from review server (auth protected) ─
+	handle /static/* {
+		basicauth {
+			{$DASHBOARD_USER:admin} {$DASHBOARD_HASH}
+		}
+		reverse_proxy review-server:5050
+	}
+
+	# ─── MCP API endpoints ─────────────────────────────
+	handle /api/publish/* {
+		reverse_proxy mcp-social-publish:8001
+	}
+
+	handle /api/discover/* {
+		reverse_proxy mcp-social-discover:8002
+	}
+
+	handle /api/vault/* {
+		reverse_proxy mcp-obsidian-vault:8003
+	}
+
+	# ─── Health check (public, no auth) ────────────────
+	handle /health {
+		respond "OK" 200
+	}
+
+	# ─── Root redirect to dashboard ────────────────────
+	handle / {
+		redir /dashboard 302
+	}
+
+	# ─── Catch-all ─────────────────────────────────────
+	handle {
+		respond "Not Found" 404
+	}
+
+	# ─── Access Log ────────────────────────────────────
+	log {
+		output file /data/logs/access.log {
+			roll_size 50MiB
+			roll_keep 5
+		}
+		format json
+	}
+}

@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Boletim dos Magos — Capa</title>
+<style>
+  :root {
+    --bg-0: #0a0f1e;
+    --bg-1: #111a35;
+    --ink: #f1f5ff;
+    --muted: #8aa0d0;
+    --accent: #38bdf8;
+    --accent-2: #a78bfa;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 840px; height: 300px; overflow: hidden; }
+  body {
+    font-family: -apple-system, "Helvetica Neue", "Segoe UI", sans-serif;
+    background: radial-gradient(circle at 80% 10%, #1b2a5c 0%, var(--bg-1) 40%, var(--bg-0) 100%);
+    color: var(--ink);
+    position: relative;
+  }
+  /* subtle grid */
+  body::before {
+    content: "";
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(138, 160, 208, 0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(138, 160, 208, 0.06) 1px, transparent 1px);
+    background-size: 30px 30px;
+    pointer-events: none;
+  }
+  /* glow orbs */
+  body::after {
+    content: "";
+    position: absolute;
+    top: -80px; right: -80px;
+    width: 320px; height: 320px;
+    background: radial-gradient(circle, rgba(56, 189, 248, 0.35) 0%, transparent 70%);
+    filter: blur(20px);
+    pointer-events: none;
+  }
+  .frame {
+    position: relative;
+    z-index: 2;
+    padding: 36px 44px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 15px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 600;
+  }
+  .brand .dot {
+    width: 10px; height: 10px; border-radius: 999px;
+    background: var(--accent);
+    box-shadow: 0 0 14px var(--accent);
+  }
+  .edicao {
+    font-size: 14px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+  .edicao strong {
+    color: var(--accent);
+    font-weight: 700;
+  }
+  h1 {
+    font-family: "Georgia", "Times New Roman", serif;
+    font-size: 62px;
+    line-height: 0.95;
+    letter-spacing: -0.02em;
+    margin-top: 8px;
+    background: linear-gradient(120deg, #f1f5ff 0%, #93c5fd 50%, #c4b5fd 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  h1 .emoji {
+    -webkit-text-fill-color: initial;
+    color: initial;
+  }
+  .sub {
+    font-size: 16px;
+    color: var(--muted);
+    line-height: 1.4;
+    max-width: 640px;
+    margin-top: 6px;
+  }
+  .bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    font-size: 13px;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+  }
+  .tags {
+    display: flex;
+    gap: 8px;
+  }
+  .tag {
+    background: rgba(56, 189, 248, 0.12);
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    color: #bae6fd;
+    padding: 5px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+  .data {
+    font-weight: 600;
+    color: #cbd5e1;
+  }
+</style>
+</head>
+<body>
+  <div class="frame">
+    <div class="top">
+      <div class="brand"><span class="dot"></span>Boletim dos Magos · AutomatikLabs</div>
+      <div class="edicao">Edição <strong id="ed">#00</strong></div>
+    </div>
+    <div>
+      <h1><span class="emoji">🔮</span> <span id="titulo">Carregando...</span></h1>
+      <p class="sub" id="subtitulo">—</p>
+    </div>
+    <div class="bottom">
+      <div class="tags" id="tags"></div>
+      <div class="data" id="data">—</div>
+    </div>
+  </div>
+
+<script>
+  // Preenche a capa a partir de query string:
+  // ?edicao=12&titulo=Agentes+saem+do+laboratorio&sub=...&data=09+abr+2026&tags=tag1|tag2|tag3
+  const q = new URLSearchParams(location.search);
+  const ed = q.get('edicao') || '12';
+  const titulo = q.get('titulo') || 'Edição da Semana';
+  const sub = q.get('sub') || '';
+  const data = q.get('data') || '';
+  const tags = (q.get('tags') || '').split('|').filter(Boolean);
+
+  document.getElementById('ed').textContent = '#' + ed;
+  document.getElementById('titulo').textContent = titulo;
+  document.getElementById('subtitulo').textContent = sub;
+  document.getElementById('data').textContent = data;
+  const tagsEl = document.getElementById('tags');
+  tags.slice(0, 3).forEach(t => {
+    const span = document.createElement('span');
+    span.className = 'tag';
+    span.textContent = t;
+    tagsEl.appendChild(span);
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,2 @@
+shell-init: error retrieving current directory: getcwd: cannot access parent directories: Operation not permitted
+/bin/bash: /Users/rafaelmelgaco/Downloads/melgateam/growthOS/boletim/scripts/run-boletim.sh: Operation not permitted

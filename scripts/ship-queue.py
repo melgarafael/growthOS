@@ -138,19 +138,24 @@ def ensure_caption(folder: Path, queue: dict, idx: int) -> bool:
 
 
 def publish(folder: Path, queue: dict, idx: int, dry_run: bool) -> bool:
+    item = queue["items"][idx]
+    schedule_for = item.get("scheduled_for")
     update_status(queue, idx, "publishing")
     print(f"  🚀 publishing {folder.name}...")
 
     cmd = [str(VENV_PY), str(PUBLISHER), "--folder", str(folder)]
     if dry_run:
         cmd.append("--dry-run")
+    if schedule_for:
+        cmd.extend(["--schedule", schedule_for])
 
     res = subprocess.run(cmd, cwd=REPO_ROOT, timeout=600)
     if res.returncode != 0:
         update_status(queue, idx, "failed", error="publish failed")
         return False
 
-    update_status(queue, idx, "done", published_at=datetime.now().isoformat())
+    final_status = "scheduled" if schedule_for and not dry_run else "done"
+    update_status(queue, idx, final_status, published_at=datetime.now().isoformat())
     return True
 
 

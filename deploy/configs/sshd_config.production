@@ -1,0 +1,24 @@
+# GrowthOS SSH Hardened Config
+# Review and copy to /etc/ssh/sshd_config
+
+Port 22
+PermitRootLogin no
+PasswordAuthentication no
+ChallengeResponseAuthentication no
+UsePAM yes
+PubkeyAuthentication yes
+AuthorizedKeysFile .ssh/authorized_keys
+
+MaxAuthTries 3
+MaxSessions 5
+ClientAliveInterval 300
+ClientAliveCountMax 2
+LoginGraceTime 30
+
+X11Forwarding no
+AllowTcpForwarding no
+AllowAgentForwarding no
+PermitEmptyPasswords no
+
+# Restrict to deploy user (uncomment and adjust)
+# AllowUsers deploy
