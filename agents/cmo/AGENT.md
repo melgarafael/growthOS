@@ -71,7 +71,9 @@ HELP        — explain GrowthOS capabilities, how to use features
 | PUBLISH | `social-publisher` | `platform-mastery` | CMO queues if publisher unavailable |
 | RESEARCH | `intelligence-analyst` | `competitive-intelligence` | CMO does basic research directly |
 | VISUAL | `visual-designer` | — | CMO describes needs if designer unavailable |
-| LANDING | `growth-engineer` | `landing-page-design` | — |
+| LANDING | `sales-page-architect` | `sales-page` | CMO loads `sales-page` skill for the 8-phase pipeline. Replaces old `landing-page-design`. |
+| SALES_PAGE | `sales-page-architect` | `sales-page` | Same as LANDING — explicit alias for clarity |
+| MEME | `meme-creator` | `meme-creation`, `copywriting`, `platform-mastery` | CMO handles for simple single-line meme ideas |
 | PIPELINE | CMO orchestrates | Multiple skills | Break into sequential steps |
 | CONFIGURE | CMO handles directly | — | — |
 | STATUS | CMO handles directly | — | — |

@@ -95,6 +95,7 @@ If the first word of the user's input matches a known subcommand, route DIRECTLY
 | `caption` | Generate caption.md for an approved carousel folder |
 | `export` | Export carousel HTML → PNG 1080x1080 via Playwright |
 | `setup` | Run onboarding/setup flow |
+| `meme` | meme-creator agent |
 
 ---
 
@@ -557,6 +558,40 @@ Examples:
 
 ---
 
+#### Subcommand: `meme`
+
+**Syntax:** `/grow meme [tema]`
+**Agent:** meme-creator
+**Skills:** meme-creation, copywriting, platform-mastery, video-production
+
+**Optional flags:**
+- `--format [reel|carrossel|imagem]` — Force output format (default: agent decides based on template)
+- `--template [name]` — Force specific meme template (pov-timeline, pov-profissional, expectativa-vs-realidade, ninguem-fala-sobre, fases-do-luto, starter-pack, evolucao-semanal)
+- `--batch [N]` — Generate N memes at once (default: 1)
+- `--mine` — Mine-only mode: research and populate meme-bank without generating scripts
+- `--from-bank` — Skip live research, generate from saved insights only
+- `--nicho [tema]` — Focus on a sub-niche (e.g., "claude code", "empreendedorismo")
+
+**Argument parsing:**
+- `tema` (optional) — Topic or theme for the meme. Everything after "meme" (excluding flags) is the tema. If omitted, agent mines trending topics automatically.
+
+**If invoked without arguments** (`/grow meme` with nothing after), generate 1 meme from trending topics (default behavior).
+
+**Usage examples:**
+```
+/grow meme                                    # 1 meme from trending topics
+/grow meme "contradições da semana"           # 1 meme about weekly contradictions
+/grow meme --batch 5                          # 5 varied memes
+/grow meme --mine                             # research only, populate meme-bank
+/grow meme --from-bank                        # generate from saved insights
+/grow meme --format reel --template pov-timeline --batch 3
+/grow meme "expert instantâneo" --nicho "consultoria de IA"
+```
+
+**Delegation:** Load `agents/meme-creator/AGENT.md`, pass tema, flags, and brand-voice context. The agent executes a 3-phase pipeline: Humor Mining → Roteiro Generation → Output.
+
+---
+
 ### Step 4: CMO Intent Classification
 
 For natural language input, classify the user's intent using the CMO router logic.
@@ -568,6 +603,8 @@ Analyze the input against these intent categories, checking trigger words and se
 **strategy** (growth-strategist): plan, strategy, OKR, roadmap, calendar, campaign plan, go-to-market, GTM, quarterly plan, content strategy, marketing plan
 
 **create** (content-creator): write, create, draft, blog, article, newsletter, email, copy, post (when creating new content), thread, content
+
+**meme** (meme-creator): meme, memes, humor, engraçado, piada, POV, roteiro de meme, meme de IA
 
 **publish** (social-publisher): publish, post (when distributing existing content), share, schedule, distribute, send, push live, go live
 
