@@ -1,0 +1,337 @@
+# Instincts generated from https://github.com/melgarafael/growthOS
+# Generated: 2026-07-06T16:39:01.773Z
+# Version: 2.0
+# NOTE: This file supplements (does not replace) any existing curated instincts.
+# High-confidence manually curated instincts should be preserved alongside these.
+
+---
+id: growthOS-commit-conventional
+trigger: "when writing a commit message"
+confidence: 0.85
+domain: git
+source: repo-analysis
+source_repo: https://github.com/melgarafael/growthOS
+---
+
+# GrowthOS Commit Conventional
+
+## Action
+
+Use conventional commit format with prefixes: feat
+
+## Evidence
+
+- 1 commits analyzed
+- Detected conventional commit pattern
+- Examples: feat: add sales-page-persona-simulator skill
+
+---
+id: growthOS-commit-length
+trigger: "when writing a commit message"
+confidence: 0.6
+domain: git
+source: repo-analysis
+source_repo: https://github.com/melgarafael/growthOS
+---
+
+# GrowthOS Commit Length
+
+## Action
+
+Keep commit messages concise (~44 characters)
+
+## Evidence
+
+- Average commit message length: 44 chars
+- Based on 1 commits
+
+---
+id: growthOS-naming-files
+trigger: "when creating a new file"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/melgarafael/growthOS
+---
+
+# GrowthOS Naming Files
+
+## Action
+
+Use PascalCase naming convention
+
+## Evidence
+
+- Analyzed file naming patterns in repository
+- Dominant pattern: PascalCase
+
+---
+id: growthOS-import-relative
+trigger: "when importing modules"
+confidence: 0.75
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/melgarafael/growthOS
+---
+
+# GrowthOS Import Relative
+
+## Action
+
+Use relative imports for project files
+
+## Evidence
+
+- Import analysis shows relative import pattern
+- Example: import { x } from '../lib/x'
+
+---
+id: growthOS-export-style
+trigger: "when exporting from a module"
+confidence: 0.7
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/melgarafael/growthOS
+---
+
+# GrowthOS Export Style
+
+## Action
+
+Prefer named exports
+
+## Evidence
+
+- Export pattern analysis
+- Dominant style: named
+
+---
+id: growthOS-test-separate
+trigger: "when writing tests"
+confidence: 0.8
+domain: testing
+source: repo-analysis
+source_repo: https://github.com/melgarafael/growthOS
+---
+
+# GrowthOS Test Separate
+
+## Action
+
+Place tests in the tests/ or __tests__/ directory, mirroring src structure
+
+## Evidence
+
+- Separate test directory pattern detected
+- Tests live in dedicated test folders
+
+---
+id: growthos-instinct-file-naming
+trigger: "When creating a new file"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: melgarafael/growthOS
+---
+
+# Growthos Instinct File Naming
+
+## Action
+
+Name the file using PascalCase (e.g., MyFile.ts)
+
+## Evidence
+
+- Pattern in namingConventions.files: PascalCase
+
+---
+id: growthos-instinct-function-naming
+trigger: "When defining a new function"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: melgarafael/growthOS
+---
+
+# Growthos Instinct Function Naming
+
+## Action
+
+Use camelCase for the function name
+
+## Evidence
+
+- Pattern in namingConventions.functions: camelCase
+
+---
+id: growthos-instinct-class-naming
+trigger: "When defining a new class"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: melgarafael/growthOS
+---
+
+# Growthos Instinct Class Naming
+
+## Action
+
+Use PascalCase for the class name
+
+## Evidence
+
+- Pattern in namingConventions.classes: PascalCase
+
+---
+id: growthos-instinct-constant-naming
+trigger: "When declaring a constant"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: melgarafael/growthOS
+---
+
+# Growthos Instinct Constant Naming
+
+## Action
+
+Use SCREAMING_SNAKE_CASE for the constant name
+
+## Evidence
+
+- Pattern in namingConventions.constants: SCREAMING_SNAKE_CASE
+
+---
+id: growthos-instinct-import-style
+trigger: "When importing modules"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: melgarafael/growthOS
+---
+
+# Growthos Instinct Import Style
+
+## Action
+
+Use relative import paths
+
+## Evidence
+
+- Pattern in importStyle: relative
+
+---
+id: growthos-instinct-export-style
+trigger: "When exporting from a module"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: melgarafael/growthOS
+---
+
+# Growthos Instinct Export Style
+
+## Action
+
+Use named exports
+
+## Evidence
+
+- Pattern in exportStyle: named
+
+---
+id: growthos-instinct-commit-format
+trigger: "When writing a commit message"
+confidence: 0.9
+domain: git
+source: repo-analysis
+source_repo: melgarafael/growthOS
+---
+
+# Growthos Instinct Commit Format
+
+## Action
+
+Use the conventional commit format with 'feat' prefix for new features (e.g., 'feat: add feature description')
+
+## Evidence
+
+- Pattern in commits.prefixes: ['feat']
+- Example: 'feat: add sales-page-persona-simulator skill'
+
+---
+id: growthos-instinct-commit-length
+trigger: "When writing a commit message"
+confidence: 0.7
+domain: git
+source: repo-analysis
+source_repo: melgarafael/growthOS
+---
+
+# Growthos Instinct Commit Length
+
+## Action
+
+Keep the commit message concise, around 44 characters on average
+
+## Evidence
+
+- Pattern in commits.averageLength: 44
+
+---
+id: growthos-instinct-test-location
+trigger: "When adding or updating tests"
+confidence: 0.8
+domain: testing
+source: repo-analysis
+source_repo: melgarafael/growthOS
+---
+
+# Growthos Instinct Test Location
+
+## Action
+
+Place test files in a separate test directory, not alongside source files
+
+## Evidence
+
+- Pattern in architecture.testLocation: separate
+
+---
+id: growthos-instinct-folder-usage-commands
+trigger: "When adding command-related logic"
+confidence: 0.8
+domain: architecture
+source: repo-analysis
+source_repo: melgarafael/growthOS
+---
+
+# Growthos Instinct Folder Usage Commands
+
+## Action
+
+Place files in the 'commands' folder
+
+## Evidence
+
+- Pattern in architecture.commonFolders: commands
+
+---
+id: growthos-instinct-folder-usage-skills
+trigger: "When adding skill-related logic"
+confidence: 0.8
+domain: architecture
+source: repo-analysis
+source_repo: melgarafael/growthOS
+---
+
+# Growthos Instinct Folder Usage Skills
+
+## Action
+
+Place files in the 'skills' folder
+
+## Evidence
+
+- Pattern in architecture.commonFolders: skills
+
