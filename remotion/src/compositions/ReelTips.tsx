@@ -6,6 +6,8 @@ import {
   spring,
   Sequence,
   AbsoluteFill,
+  Audio,
+  staticFile,
 } from "remotion";
 import type { CompositionProps, SceneProps } from "../types";
 import { AnimatedText } from "../components/AnimatedText";
@@ -45,6 +47,7 @@ const HookScene: React.FC<{ scene: SceneProps; accentColor: string }> = ({
           opacity,
           transform: `scale(${scale})`,
           textAlign: "center",
+          maxWidth: 900,
         }}
       >
         <div
@@ -226,6 +229,7 @@ export const ReelTips: React.FC<CompositionProps> = ({
   scenes,
   showProgressBar = true,
   showWatermark = true,
+  audioSrc,
 }) => {
   const accentColor = brand.colors.accent;
 
@@ -233,9 +237,11 @@ export const ReelTips: React.FC<CompositionProps> = ({
 
   return (
     <AbsoluteFill>
+      {audioSrc && <Audio src={staticFile(audioSrc)} />}
+
       <BackgroundGradient
-        colorFrom="#0a0a0a"
-        colorTo="#1a1a2e"
+        colorFrom={brand.colors.background}
+        colorTo={brand.colors.primary}
         colorMid={`${accentColor}15`}
       />
 

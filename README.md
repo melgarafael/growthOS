@@ -1,6 +1,6 @@
 # GrowthOS
 
-**Autonomous marketing team for Claude Code** — 9 AI agents, 20 skills, 4 MCP servers, one `/grow` command.
+**Autonomous marketing team for Claude Code** — 13 AI agents, 28 skills, 4 MCP servers, one `/grow` command.
 
 GrowthOS turns Claude Code into a full-stack growth engine: strategy, content creation, SEO, social publishing, competitive intelligence, video production, and landing page design — all orchestrated by AI agents with built-in safety controls.
 
@@ -10,8 +10,8 @@ GrowthOS turns Claude Code into a full-stack growth engine: strategy, content cr
 
 | Category | What You Get |
 |----------|-------------|
-| **9 AI Agents** | CMO (router), Growth Strategist, Content Creator, Intelligence Analyst, Visual Designer, Social Publisher, Growth Engineer, Carousel Designer, Video Producer |
-| **20 Skills** | Marketing Strategy, Copywriting, SEO Growth, Content Creation, Social Media, Competitive Intel, Video Production, Landing Pages, Platform Mastery, Instagram Carousel, Remotion Video, Remotion Pro, + 8 Showcase templates |
+| **13 AI Agents** | CMO (router), Growth Strategist, Content Creator, Intelligence Analyst, Visual Designer, Social Publisher, Growth Engineer, Carousel Designer, Video Producer, Video Editor |
+| **28 Skills** | Marketing Strategy, Copywriting, SEO Growth, Content Creation, Social Media, Competitive Intel, Video Production, Raw Footage Editing, Landing Pages, Platform Mastery, Instagram Carousel, Remotion Video, Remotion Pro, + 8 Showcase templates, + 7 Sales Page pipeline skills |
 | **4 MCP Servers** | Social Publish (Twitter, LinkedIn, Reddit, GitHub, Threads), Social Discover (analytics), Obsidian Vault (knowledge base), Remotion Render (video) |
 | **Safety System** | Dry-run by default, progressive autonomy (4 levels), audit logging, circuit breaker |
 | **Video Engine** | 11 Remotion compositions for reels, explainers, product demos, walkthroughs |
@@ -145,7 +145,7 @@ Once installed, everything goes through `/grow`:
 
 ## Skills Reference
 
-### Core Skills (11)
+### Core Skills (12)
 
 | Skill | What It Does | Trigger Example |
 |-------|-------------|-----------------|
@@ -156,6 +156,7 @@ Once installed, everything goes through `/grow`:
 | **Social Media Management** | Platform strategies, scheduling, community management | `/grow create social "launch campaign"` |
 | **Competitive Intelligence** | SWOT analysis, market trends, competitor tracking | `/grow analyze "competitor X"` |
 | **Video Production** | Scripts, storyboards, video SEO, thumbnail concepts | `/grow video script "product demo"` |
+| **Raw Footage Editing** | Silence-cut, semantic trim, word-synced burned-in captions for real recordings | `/grow edit-video ~/raw/clip.mp4` |
 | **Landing Page Design** | Conversion-optimized HTML, hero sections, A/B variants | `/grow landing "feature Y"` |
 | **Platform Mastery** | Algorithm knowledge per platform (YouTube, LinkedIn, X, etc.) | `/grow research "LinkedIn algorithm"` |
 | **Instagram Carousel** | 6 carousel structures, slide blueprints, engagement triggers | `/grow carousel "10 tips"` |
@@ -193,7 +194,8 @@ GrowthOS uses a **CMO router** that automatically delegates to specialist agents
 | **Social Publisher** | Platform-specific content, publishing | Social media tasks |
 | **Growth Engineer** | Technical SEO, landing page code | Technical growth |
 | **Carousel Designer** | Instagram carousel design and generation | Carousel requests |
-| **Video Producer** | Video scripts, Remotion compositions | Video requests |
+| **Video Producer** | Video scripts, Remotion compositions | Video requests with no source footage |
+| **Video Editor** | Cuts and captions raw video files (silence-cut, semantic trim, whisper captions) | Editing an existing raw recording |
 
 ---
 
@@ -243,7 +245,7 @@ growthOS/
 ├── brand-voice.example.yaml     # Brand config template
 ├── .env.example                 # Environment variables template
 │
-├── agents/                      # 9 AI agents
+├── agents/                      # 13 AI agents
 │   ├── cmo/                     #   CMO — intent router
 │   ├── growth-strategist/       #   Strategic planning
 │   ├── content-creator/         #   Content production
@@ -252,16 +254,18 @@ growthOS/
 │   ├── social-publisher/        #   Social media ops
 │   ├── growth-engineer/         #   Technical growth
 │   ├── carousel-designer/       #   Carousel generation
-│   └── video-producer/          #   Video production
+│   ├── video-producer/          #   Video production (synthetic, Remotion)
+│   └── video-editor/            #   Video editing (raw footage cut + captions)
 │
-├── skills/                      # 20 specialized skills
-│   ├── marketing-strategy/      #   Core skills (11)
+├── skills/                      # 28 specialized skills
+│   ├── marketing-strategy/      #   Core skills (12)
 │   ├── copywriting/
 │   ├── seo-growth/
 │   ├── content-creation/
 │   ├── social-media-management/
 │   ├── competitive-intelligence/
 │   ├── video-production/
+│   ├── raw-footage-editing/
 │   ├── landing-page-design/
 │   ├── platform-mastery/
 │   ├── instagram-carousel/

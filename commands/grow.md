@@ -97,6 +97,8 @@ If the first word of the user's input matches a known subcommand, route DIRECTLY
 | `setup` | Run onboarding/setup flow |
 | `meme` | meme-creator agent |
 | `simulate` | sales-page-persona-simulator skill |
+| `video` | video-producer agent (generates a video from a brief — no source footage) |
+| `edit-video` | video-editor agent (cuts and captions an existing raw video file) |
 
 ---
 
@@ -573,6 +575,43 @@ Examples:
 
 ---
 
+#### Subcommand: `edit-video`
+
+**Syntax:** `/grow edit-video <path-to-raw-video-or-folder> [--platform platform]`
+**Agent:** video-editor
+**Skills:** raw-footage-editing, platform-mastery, copywriting
+
+Cuts an existing raw recording — not a video generated from a brief. Removes silence, trims semantically (flubs, repeats, dead lead-ins), transcribes with word-level timestamps, and burns in synced captions.
+
+**Optional flags:**
+- `--platform [platform]` — Destination platform, used to pick aspect ratio/duration via `platform-mastery` (default: instagram, 9:16 reels)
+- `--model [path]` — Whisper model path override (default: discovered per `raw-footage-editing` skill)
+
+**Argument parsing:**
+- `path` (required) — File or folder path to the raw video(s). If missing, ask for it — never guess a path.
+
+**Requires on the machine:** `ffmpeg`, `auto-editor`, `whisper-cli`, and a whisper model. If any is missing, report exactly which one and point to the `editor-de-video-claude` installer — do not attempt to install them as part of this command.
+
+**If invoked without arguments** (`/grow edit-video` with nothing after), show:
+```
+Usage: /grow edit-video <path-to-raw-video-or-folder> [--platform platform]
+
+Cut and caption an existing raw video — silence removal, semantic
+trimming, word-synced burned-in captions.
+
+Optional flags:
+  --platform [name]   Destination platform (default: instagram)
+  --model [path]      Whisper model path override
+
+Examples:
+  /grow edit-video ~/Videos/raw/entrevista-bruta.mp4
+  /grow edit-video ~/Videos/raw/aula-completa.mov --platform youtube
+```
+
+**Delegation:** Load `agents/video-editor/AGENT.md`, pass the path, flags, and brand-voice context.
+
+---
+
 #### Subcommand: `simulate`
 
 **Syntax:** `/grow simulate [slug]`
@@ -666,12 +705,17 @@ Analyze the input against these intent categories, checking trigger words and se
 
 **landing** (growth-engineer): landing page, conversion, A/B test, CRO, funnel, optimize (page), sign-up page, lead capture, squeeze page
 
+**video-create** (video-producer): make a video, video about, reel, reels, shorts, explainer video, tutorial video, demo video, criar video, criar reel, animated carousel, carrossel animado, motion graphics — no existing source file involved
+
+**video-edit** (video-editor): edit this video, edit the footage, cut this video, cut the silence, caption this video, corta esse video, corta o bruto, legenda esse video, corta o silencio, processa essa gravacao, a folder/file path to an existing raw recording plus an edit request
+
 #### 4b. Disambiguation Rules
 
 1. **Verb Priority** — The primary verb determines intent. "Write a post" = create. "Publish a post" = publish.
 2. **Context Check** — If the verb is ambiguous (e.g., "post"): Does content already exist? If yes, route to publish. If it's a new content request, route to create. Does it mention a platform by name? Route to publish.
-3. **Compound Intent** — If the request contains verbs from multiple intent categories, check if it matches a pipeline pattern (e.g., "create and publish" = content-creator then social-publisher). If a pipeline matches, execute agents in sequence. If no pipeline matches, ask which to do first.
-4. **Low Confidence** — If confidence is below 60%, ask ONE clarification question. Never ask more than one. If still ambiguous after one question, default to the most likely intent and state the assumption.
+3. **Video source check** — "video" alone is ambiguous between video-create and video-edit. Does the request reference an existing file/folder path, an attachment, or a phrase like "this video"/"esse video"/"esse bruto"? Route to video-edit. Is it a topic/brief with no source file ("a video about X")? Route to video-create. If genuinely unclear, ask which one.
+4. **Compound Intent** — If the request contains verbs from multiple intent categories, check if it matches a pipeline pattern (e.g., "create and publish" = content-creator then social-publisher). If a pipeline matches, execute agents in sequence. If no pipeline matches, ask which to do first.
+5. **Low Confidence** — If confidence is below 60%, ask ONE clarification question. Never ask more than one. If still ambiguous after one question, default to the most likely intent and state the assumption.
 
 #### 4c. Pipeline Detection
 

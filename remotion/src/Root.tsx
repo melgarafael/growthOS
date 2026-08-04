@@ -1,13 +1,14 @@
 import React from "react";
 import { Composition, AbsoluteFill, Sequence } from "remotion";
-import { compositions } from "./compositions/index";
+import { compositions, ReelTips } from "./compositions/index";
 import type { CompositionProps, BrandProps } from "./types";
 import { AnimatedText } from "./components/AnimatedText";
 import { ProgressBar } from "./components/ProgressBar";
 import { BrandWatermark } from "./components/BrandWatermark";
 import { BackgroundGradient } from "./components/BackgroundGradient";
 
-/** Generic scene renderer used by all compositions until Phase B templates are built */
+/** Generic scene renderer used by templates that don't yet have a
+ *  dedicated component (Phase B templates still pending). */
 const GenericComposition: React.FC<CompositionProps> = ({
   brand,
   scenes,
@@ -107,7 +108,7 @@ const defaultProps: CompositionProps = {
       startFrame: 240,
       durationFrames: 90,
       text: "Follow for more!",
-      icon: "\uD83D\uDC49",
+      icon: "👉",
       animation: "bounce",
     },
   ],
@@ -124,7 +125,14 @@ export const RemotionRoot: React.FC = () => {
         <Composition
           key={comp.id}
           id={comp.id}
-          component={GenericComposition}
+          // Scoped fix: only ReelTips gets routed to its dedicated
+          // component so far (it's the only one with a hand-built
+          // Hook/Point/CTA layout ready for production use). Other
+          // templates keep using GenericComposition until their own
+          // dedicated components are wired up the same way, to avoid
+          // breaking their Studio preview (which still relies on this
+          // one-size-fits-all `defaultProps` shape).
+          component={comp.id === "ReelTips" ? ReelTips : GenericComposition}
           durationInFrames={comp.defaultDuration * comp.fps}
           fps={comp.fps}
           width={comp.width}
