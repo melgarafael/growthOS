@@ -106,7 +106,10 @@ async def publish_post(
             platform=name,
             content_hash=_content_hash(content),
             status="simulated",
-            metadata={"content_length": len(content), "media_count": len(media_urls or [])},
+            metadata={
+                "content_length": len(content),
+                "media_count": len(media_urls or []),
+            },
         )
         return {
             "status": "dry_run",
@@ -205,9 +208,7 @@ async def get_rate_limits() -> dict:
             "remaining": status.remaining,
             "limit": status.limit,
             "reset_at": status.reset_at.isoformat(),
-            "usage_percent": round(
-                (1 - status.remaining / status.limit) * 100, 1
-            )
+            "usage_percent": round((1 - status.remaining / status.limit) * 100, 1)
             if status.limit > 0
             else 0,
         }

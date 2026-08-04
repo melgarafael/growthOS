@@ -49,52 +49,125 @@ SUBCOMMAND_KEYWORDS: dict[str, Intent] = {
     "setup": Intent.SETUP,
 }
 
-CONTENT_TYPES = {"blog", "social", "newsletter", "email", "thread", "article", "carousel"}
+CONTENT_TYPES = {
+    "blog",
+    "social",
+    "newsletter",
+    "email",
+    "thread",
+    "article",
+    "carousel",
+}
 
 PLATFORMS = {
-    "linkedin", "twitter", "x", "reddit", "threads",
-    "github", "youtube", "instagram", "stackoverflow",
+    "linkedin",
+    "twitter",
+    "x",
+    "reddit",
+    "threads",
+    "github",
+    "youtube",
+    "instagram",
+    "stackoverflow",
 }
 
 REPORT_PERIODS = {
-    "weekly", "monthly", "quarterly", "yearly", "ytd",
-    "last-week", "last-month", "last-quarter",
+    "weekly",
+    "monthly",
+    "quarterly",
+    "yearly",
+    "ytd",
+    "last-week",
+    "last-month",
+    "last-quarter",
 }
 
 INTENT_TRIGGERS: dict[Intent, list[str]] = {
     Intent.STRATEGY: [
-        "plan", "strategy", "okr", "roadmap", "calendar",
-        "campaign plan", "go-to-market", "gtm", "quarterly plan",
-        "content strategy", "marketing plan",
+        "plan",
+        "strategy",
+        "okr",
+        "roadmap",
+        "calendar",
+        "campaign plan",
+        "go-to-market",
+        "gtm",
+        "quarterly plan",
+        "content strategy",
+        "marketing plan",
     ],
     Intent.CREATE: [
-        "write", "create", "draft", "blog", "article",
-        "newsletter", "email", "copy", "thread", "content",
+        "write",
+        "create",
+        "draft",
+        "blog",
+        "article",
+        "newsletter",
+        "email",
+        "copy",
+        "thread",
+        "content",
     ],
     Intent.PUBLISH: [
-        "publish", "share", "schedule", "distribute",
-        "send", "push live", "go live",
+        "publish",
+        "share",
+        "schedule",
+        "distribute",
+        "send",
+        "push live",
+        "go live",
     ],
     Intent.ANALYZE: [
-        "analyze", "competitor", "market", "trend", "swot",
-        "benchmark", "compare", "landscape",
+        "analyze",
+        "competitor",
+        "market",
+        "trend",
+        "swot",
+        "benchmark",
+        "compare",
+        "landscape",
     ],
     Intent.RESEARCH: [
-        "research", "find", "explore", "discover",
-        "investigate", "look into", "dig into", "learn about",
+        "research",
+        "find",
+        "explore",
+        "discover",
+        "investigate",
+        "look into",
+        "dig into",
+        "learn about",
     ],
     Intent.REPORT: [
-        "report", "summary", "metrics", "performance",
-        "dashboard", "analytics", "kpis", "results",
+        "report",
+        "summary",
+        "metrics",
+        "performance",
+        "dashboard",
+        "analytics",
+        "kpis",
+        "results",
     ],
     Intent.VISUAL: [
-        "design", "visual", "image", "graphic", "thumbnail",
-        "banner", "og image", "social graphic", "infographic",
+        "design",
+        "visual",
+        "image",
+        "graphic",
+        "thumbnail",
+        "banner",
+        "og image",
+        "social graphic",
+        "infographic",
         "carousel design",
     ],
     Intent.LANDING: [
-        "landing page", "conversion", "a/b test", "cro",
-        "funnel", "sign-up page", "lead capture", "squeeze page",
+        "landing page",
+        "conversion",
+        "a/b test",
+        "cro",
+        "funnel",
+        "sign-up page",
+        "lead capture",
+        "squeeze page",
     ],
 }
 
@@ -107,18 +180,26 @@ PIPELINE_PATTERNS: dict[str, list[Intent]] = {
 
 PIPELINE_TRIGGERS: dict[str, list[str]] = {
     "create-and-publish": [
-        "create and publish", "write and share", "draft and post",
+        "create and publish",
+        "write and share",
+        "draft and post",
     ],
     "create-and-design": [
-        "create with image", "create with graphic", "create with visual",
-        "write and design", "blog post with og image",
+        "create with image",
+        "create with graphic",
+        "create with visual",
+        "write and design",
+        "blog post with og image",
     ],
     "research-and-create": [
-        "research and write", "research and create", "research and draft",
+        "research and write",
+        "research and create",
+        "research and draft",
         "find out about and write",
     ],
     "full-publish-pipeline": [
-        "create, design, and publish", "end to end campaign",
+        "create, design, and publish",
+        "end to end campaign",
         "full pipeline",
     ],
 }
@@ -127,6 +208,7 @@ PIPELINE_TRIGGERS: dict[str, list[str]] = {
 @dataclass
 class SubcommandResult:
     """Result of subcommand argument parsing."""
+
     intent: Intent
     agent: str | None
     args: dict[str, str | None] = field(default_factory=dict)
@@ -136,6 +218,7 @@ class SubcommandResult:
 @dataclass
 class RouteResult:
     """Result of the full routing decision."""
+
     intent: Intent
     agent: str | None
     confidence: float = 1.0
@@ -174,12 +257,14 @@ def parse_subcommand(keyword: str, remaining: str) -> SubcommandResult:
         if first_word in CONTENT_TYPES:
             topic = words[1] if len(words) > 1 else None
             return SubcommandResult(
-                intent=intent, agent=agent,
+                intent=intent,
+                agent=agent,
                 args={"type": first_word, "topic": topic},
                 needs_help=topic is None,
             )
         return SubcommandResult(
-            intent=intent, agent=agent,
+            intent=intent,
+            agent=agent,
             args={"type": None, "topic": remaining},
         )
 
@@ -189,11 +274,13 @@ def parse_subcommand(keyword: str, remaining: str) -> SubcommandResult:
         if first_word in PLATFORMS:
             content = words[1] if len(words) > 1 else None
             return SubcommandResult(
-                intent=intent, agent=agent,
+                intent=intent,
+                agent=agent,
                 args={"platform": first_word, "content": content},
             )
         return SubcommandResult(
-            intent=intent, agent=agent,
+            intent=intent,
+            agent=agent,
             args={"platform": None, "content": remaining},
         )
 
@@ -209,11 +296,13 @@ def parse_subcommand(keyword: str, remaining: str) -> SubcommandResult:
         if first_word in REPORT_PERIODS:
             focus = words[1] if len(words) > 1 else None
             return SubcommandResult(
-                intent=intent, agent=agent,
+                intent=intent,
+                agent=agent,
                 args={"period": first_word, "focus": focus},
             )
         return SubcommandResult(
-            intent=intent, agent=agent,
+            intent=intent,
+            agent=agent,
             args={"period": "monthly", "focus": remaining},
         )
 
@@ -340,7 +429,9 @@ def classify_intent(text: str) -> RouteResult:
     # Confidence: ratio of best score to max possible, capped at 0.95 for NLP
     max_score = max(scores.values())
     second_best = sorted(scores.values(), reverse=True)[1] if len(scores) > 1 else 0
-    confidence = min(0.95, max_score / (max_score + second_best) if second_best > 0 else 0.9)
+    confidence = min(
+        0.95, max_score / (max_score + second_best) if second_best > 0 else 0.9
+    )
 
     return RouteResult(
         intent=best_intent,

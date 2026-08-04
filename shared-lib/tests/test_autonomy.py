@@ -89,7 +89,10 @@ class TestActionClassification:
             assert AutonomyManager._classify_action(action) == ActionType.EXTERNAL
 
     def test_unknown_action_defaults_to_external(self) -> None:
-        assert AutonomyManager._classify_action("some_unknown_action") == ActionType.EXTERNAL
+        assert (
+            AutonomyManager._classify_action("some_unknown_action")
+            == ActionType.EXTERNAL
+        )
 
     def test_no_overlap_between_sets(self) -> None:
         assert not (INTERNAL_ACTIONS & CREATION_ACTIONS)
@@ -198,7 +201,9 @@ class TestKillSwitch:
         assert mgr.is_kill_switch_active() is False
         assert mgr.get_level() == AutonomyLevel.AUTO
 
-    def test_kill_switch_requires_approval_for_non_internal(self, tmp_path: Path) -> None:
+    def test_kill_switch_requires_approval_for_non_internal(
+        self, tmp_path: Path
+    ) -> None:
         mgr = _make_manager(tmp_path, level="auto")
         mgr.activate_kill_switch()
         assert mgr.requires_approval("publish_post") is True

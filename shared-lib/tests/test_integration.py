@@ -14,7 +14,11 @@ import yaml
 
 from growthOS_shared.audit_logger import AuditLogger
 from growthOS_shared.autonomy import AutonomyLevel, AutonomyManager
-from growthOS_shared.circuit_breaker import CircuitBreaker, CircuitOpenError, CircuitState
+from growthOS_shared.circuit_breaker import (
+    CircuitBreaker,
+    CircuitOpenError,
+    CircuitState,
+)
 from growthOS_shared.config import AutonomyConfig, BrandVoiceConfig, load_brand_voice
 from growthOS_shared.scheduler import (
     CalendarEntry,
@@ -95,7 +99,9 @@ def schedule_yaml(tmp_dir: Path) -> Path:
 class TestConfigAutonomyChain:
     """Verify config module feeds autonomy module correctly."""
 
-    def test_load_brand_voice_provides_valid_autonomy_config(self, brand_voice_path: str):
+    def test_load_brand_voice_provides_valid_autonomy_config(
+        self, brand_voice_path: str
+    ):
         """Config loads and produces an AutonomyConfig that AutonomyManager accepts."""
         brand_config = load_brand_voice(brand_voice_path)
 
@@ -318,7 +324,9 @@ class TestCalendarEntryRoundtrip:
             restored = CalendarEntry.from_frontmatter(frontmatter)
             assert restored.status == status
 
-    def test_frontmatter_has_yaml_delimiters(self, sample_calendar_entry: CalendarEntry):
+    def test_frontmatter_has_yaml_delimiters(
+        self, sample_calendar_entry: CalendarEntry
+    ):
         """Frontmatter output starts and ends with --- delimiters."""
         fm = sample_calendar_entry.to_frontmatter()
         assert fm.startswith("---\n")

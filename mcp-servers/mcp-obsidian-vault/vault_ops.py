@@ -254,9 +254,7 @@ class VaultOperations:
                     {
                         "path": str(rel),
                         "frontmatter": dict(post.metadata),
-                        "content_preview": post.content[:200]
-                        if post.content
-                        else "",
+                        "content_preview": post.content[:200] if post.content else "",
                     }
                 )
 

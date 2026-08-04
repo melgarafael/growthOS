@@ -58,6 +58,15 @@ export interface CompositionProps {
   scenes: SceneProps[];
   showProgressBar?: boolean;
   showWatermark?: boolean;
+  /**
+   * Optional narration/voiceover audio track. Path is resolved via
+   * Remotion's `staticFile()`, so it must live under the project's
+   * `public/` directory (e.g. "narration.mp3" -> public/narration.mp3).
+   * When omitted, the composition renders silently (current default
+   * behavior for every template — see AGENT.md > Future Capabilities >
+   * "AI Voiceover", not yet implemented as an automated TTS step).
+   */
+  audioSrc?: string;
 }
 
 // ── Per-composition props ──

@@ -3,12 +3,9 @@ name: GrowthOS CI
 on:
   push:
     branches: [main]
-    paths:
-      - "growthOS/**"
   pull_request:
     branches: [main]
-    paths:
-      - "growthOS/**"
+  workflow_call:
 
 jobs:
   lint:
@@ -20,8 +17,8 @@ jobs:
         with:
           python-version: "3.11"
       - run: pip install ruff
-      - run: ruff check growthOS/
-      - run: ruff format --check growthOS/
+      - run: ruff check .
+      - run: ruff format --check .
 
   test:
     name: Test
@@ -34,13 +31,13 @@ jobs:
           python-version: "3.11"
       - name: Install dependencies
         run: |
-          pip install -e growthOS/shared-lib/
-          pip install -r growthOS/mcp-servers/mcp-social-publish/requirements.txt
-          pip install -r growthOS/mcp-servers/mcp-social-discover/requirements.txt
-          pip install -r growthOS/mcp-servers/mcp-obsidian-vault/requirements.txt
+          pip install -e shared-lib/
+          pip install -r mcp-servers/mcp-social-publish/requirements.txt
+          pip install -r mcp-servers/mcp-social-discover/requirements.txt
+          pip install -r mcp-servers/mcp-obsidian-vault/requirements.txt
           pip install pytest pytest-asyncio pytest-cov
       - name: Run tests
-        run: pytest growthOS/shared-lib/tests/ -v --tb=short
+        run: pytest shared-lib/tests/ -v --tb=short
 
   docker:
     name: Docker Build
@@ -49,11 +46,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Build MCP Social Publish
-        run: docker build --target mcp-social-publish -t growthos-social-publish:test growthOS/
+        run: docker build --target mcp-social-publish -t growthos-social-publish:test .
       - name: Build MCP Social Discover
-        run: docker build --target mcp-social-discover -t growthos-social-discover:test growthOS/
+        run: docker build --target mcp-social-discover -t growthos-social-discover:test .
       - name: Build MCP Obsidian Vault
-        run: docker build --target mcp-obsidian-vault -t growthos-obsidian-vault:test growthOS/
+        run: docker build --target mcp-obsidian-vault -t growthos-obsidian-vault:test .
 
   security:
     name: Security Scan
@@ -62,7 +59,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Build image for scan
-        run: docker build --target mcp-social-publish -t growthos-scan:latest growthOS/
+        run: docker build --target mcp-social-publish -t growthos-scan:latest .
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:

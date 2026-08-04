@@ -18,7 +18,9 @@ MAX_OUTPUT_KB = 100
 def _load_template(style: str) -> str:
     """Load an HTML template file by style name."""
     if style not in VALID_STYLES:
-        raise ValueError(f"Unknown style '{style}'. Choose from: {', '.join(VALID_STYLES)}")
+        raise ValueError(
+            f"Unknown style '{style}'. Choose from: {', '.join(VALID_STYLES)}"
+        )
     template_path = TEMPLATES_DIR / f"{style}.html"
     if not template_path.exists():
         raise FileNotFoundError(f"Template not found: {template_path}")
@@ -29,13 +31,15 @@ def _apply_anti_slop(text: str, brand_config: BrandVoiceConfig) -> str:
     """Remove banned phrases from text based on brand voice anti-slop config."""
     if not brand_config.anti_slop.enabled:
         return text
-    all_banned = brand_config.anti_slop.banned_phrases + brand_config.anti_slop.custom_banned
+    all_banned = (
+        brand_config.anti_slop.banned_phrases + brand_config.anti_slop.custom_banned
+    )
     result = text
     for phrase in all_banned:
         lower = result.lower()
         idx = lower.find(phrase.lower())
         while idx != -1:
-            result = result[:idx] + result[idx + len(phrase):]
+            result = result[:idx] + result[idx + len(phrase) :]
             lower = result.lower()
             idx = lower.find(phrase.lower())
     return result
@@ -102,7 +106,9 @@ def generate_landing_page(
         features.append({"title": "", "desc": ""})
 
     if testimonial_text is None:
-        testimonial_text = f"{product_name} helped us ship faster and with more confidence."
+        testimonial_text = (
+            f"{product_name} helped us ship faster and with more confidence."
+        )
 
     meta_description = description[:160]
     if brand_config:

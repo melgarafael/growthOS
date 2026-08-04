@@ -19,7 +19,9 @@ from pathlib import Path
 try:
     from playwright.sync_api import sync_playwright
 except ImportError:
-    print("❌ playwright not installed — run: .venv/bin/pip install playwright && .venv/bin/python -m playwright install chromium")
+    print(
+        "❌ playwright not installed — run: .venv/bin/pip install playwright && .venv/bin/python -m playwright install chromium"
+    )
     sys.exit(1)
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -27,7 +29,12 @@ GROWTHOS = REPO_ROOT / "growthOS"
 DEFAULT_OUT = GROWTHOS / "output" / "carousels"
 
 
-def export(html_path: Path, out_dir: Path, carousel_filter: str | None = None, parallel: int = 4):
+def export(
+    html_path: Path,
+    out_dir: Path,
+    carousel_filter: str | None = None,
+    parallel: int = 4,
+):
     if not html_path.exists():
         print(f"❌ not found: {html_path}")
         sys.exit(1)
@@ -55,7 +62,11 @@ def export(html_path: Path, out_dir: Path, carousel_filter: str | None = None, p
 
         total_exported = 0
         for section in sections:
-            cid = section.get_attribute("data-carousel") or section.get_attribute("id") or f"c{total_exported:02d}"
+            cid = (
+                section.get_attribute("data-carousel")
+                or section.get_attribute("id")
+                or f"c{total_exported:02d}"
+            )
             if carousel_filter and carousel_filter not in cid:
                 continue
 
@@ -104,8 +115,12 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("html", help="path to carousels-vN.html")
     parser.add_argument("--out", default=str(DEFAULT_OUT), help="output directory")
-    parser.add_argument("--carousel", default=None, help="only export this cid (e.g., c04)")
-    parser.add_argument("--parallel", type=int, default=4, help="parallel workers (unused in sync mode)")
+    parser.add_argument(
+        "--carousel", default=None, help="only export this cid (e.g., c04)"
+    )
+    parser.add_argument(
+        "--parallel", type=int, default=4, help="parallel workers (unused in sync mode)"
+    )
     args = parser.parse_args()
 
     html_path = Path(args.html).resolve()

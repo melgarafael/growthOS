@@ -135,6 +135,8 @@ def load_brand_voice(path: Optional[str] = None) -> BrandVoiceConfig:
     raw = yaml.safe_load(config_path.read_text(encoding="utf-8"))
 
     if not isinstance(raw, dict):
-        raise ValueError(f"Invalid config format in {config_path}: expected YAML mapping")
+        raise ValueError(
+            f"Invalid config format in {config_path}: expected YAML mapping"
+        )
 
     return BrandVoiceConfig(**raw)

@@ -74,7 +74,9 @@ def _apply_anti_slop(text: str, brand_config: BrandVoiceConfig) -> str:
     """Remove banned phrases from text based on brand voice anti-slop config."""
     if not brand_config.anti_slop.enabled:
         return text
-    all_banned = brand_config.anti_slop.banned_phrases + brand_config.anti_slop.custom_banned
+    all_banned = (
+        brand_config.anti_slop.banned_phrases + brand_config.anti_slop.custom_banned
+    )
     result = text
     for phrase in all_banned:
         lower = result.lower()
@@ -163,7 +165,9 @@ def _render_slide(
         "{{body}}": slide.body,
         "{{icon}}": slide.icon,
         "{{bullets}}": _render_bullets(slide.bullets),
-        "{{progress_dots}}": _generate_progress_dots(slide.slide_number, slide.total_slides),
+        "{{progress_dots}}": _generate_progress_dots(
+            slide.slide_number, slide.total_slides
+        ),
         "{{slide_number}}": str(slide.slide_number),
         "{{total_slides}}": str(slide.total_slides),
         "{{brand_name}}": brand_name,

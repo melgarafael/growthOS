@@ -21,7 +21,7 @@ import subprocess
 import sys
 from datetime import datetime, date
 from pathlib import Path
-from flask import Flask, jsonify, request, send_from_directory, render_template_string, abort
+from flask import Flask, jsonify, request, send_from_directory, abort
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 GROWTHOS = REPO_ROOT / "growthOS"
@@ -37,9 +37,18 @@ REVIEWS_DIR.mkdir(parents=True, exist_ok=True)
 PREFERENCES.mkdir(parents=True, exist_ok=True)
 
 REJECTION_TAGS = [
-    "tom_guru", "tom_motivacional", "copy_fraca", "hook_morno",
-    "layout_apertado", "cta_generico", "cliche", "vocabulario_proibido",
-    "visual_generico", "sem_dor_real", "nao_e_minha_voz", "outro",
+    "tom_guru",
+    "tom_motivacional",
+    "copy_fraca",
+    "hook_morno",
+    "layout_apertado",
+    "cta_generico",
+    "cliche",
+    "vocabulario_proibido",
+    "visual_generico",
+    "sem_dor_real",
+    "nao_e_minha_voz",
+    "outro",
 ]
 
 REVISION_TAGS = [
@@ -88,16 +97,20 @@ def save_reviews(data: dict) -> None:
 
 
 def list_carousel_files() -> list:
-    return sorted([f.name for f in DESIGN_SYSTEM.glob("carousels-v*.html")]) + \
-           sorted([f.name for f in DESIGN_SYSTEM.glob("carousel-*.html")])
+    return sorted([f.name for f in DESIGN_SYSTEM.glob("carousels-v*.html")]) + sorted(
+        [f.name for f in DESIGN_SYSTEM.glob("carousel-*.html")]
+    )
 
 
 def run_script(cmd: list, cwd: Path = None) -> dict:
     """Run a script and capture output."""
     try:
         result = subprocess.run(
-            cmd, cwd=cwd or REPO_ROOT,
-            capture_output=True, text=True, timeout=300,
+            cmd,
+            cwd=cwd or REPO_ROOT,
+            capture_output=True,
+            text=True,
+            timeout=300,
         )
         return {
             "ok": result.returncode == 0,
@@ -112,6 +125,7 @@ def run_script(cmd: list, cwd: Path = None) -> dict:
 # ─────────────────────────────────────────────────────────────────
 # Routes
 # ─────────────────────────────────────────────────────────────────
+
 
 @app.route("/assets/<path:filename>")
 def serve_asset(filename):
@@ -157,9 +171,15 @@ def index():
     """
     for f in files:
         file_reviews = reviews.get(f, {})
-        approved = sum(1 for r in file_reviews.values() if r.get("status") == "approved")
-        rejected = sum(1 for r in file_reviews.values() if r.get("status") == "rejected")
-        revised = sum(1 for r in file_reviews.values() if r.get("status") == "revision_requested")
+        approved = sum(
+            1 for r in file_reviews.values() if r.get("status") == "approved"
+        )
+        rejected = sum(
+            1 for r in file_reviews.values() if r.get("status") == "rejected"
+        )
+        revised = sum(
+            1 for r in file_reviews.values() if r.get("status") == "revision_requested"
+        )
         html += f"""
         <li class="file-card">
           <a href="/c/{f}">{f}</a>
@@ -198,14 +218,21 @@ def render_carousel(filename: str):
     families = {}
     for tag, family, desc in REVISION_TAGS:
         families.setdefault(family, []).append((tag, desc))
-    family_labels = {"copy": "COPY", "design": "DESIGN", "estrutura": "ESTRUTURA", "fato": "FATO"}
+    family_labels = {
+        "copy": "COPY",
+        "design": "DESIGN",
+        "estrutura": "ESTRUTURA",
+        "fato": "FATO",
+    }
     for fam_key, items in families.items():
         revision_tags_html += f'<div class="rev-fam"><div class="rev-fam-label">{family_labels[fam_key]}</div>'
         for tag, desc in items:
             revision_tags_html += f'<label class="rev-tag" title="{desc}"><input type="checkbox" value="{tag}">{tag}</label>'
-        revision_tags_html += '</div>'
+        revision_tags_html += "</div>"
 
-    rejection_tags_options = "".join(f'<option value="{t}">{t}</option>' for t in REJECTION_TAGS)
+    rejection_tags_options = "".join(
+        f'<option value="{t}">{t}</option>' for t in REJECTION_TAGS
+    )
 
     overlay = """
     <style>
@@ -455,7 +482,10 @@ def api_review():
 
     reviews = load_reviews()
     reviews.setdefault(file, {})[cid] = {
-        "status": status, "tag": tag, "reason": reason, "timestamp": ts,
+        "status": status,
+        "tag": tag,
+        "reason": reason,
+        "timestamp": ts,
     }
     save_reviews(reviews)
 
@@ -472,16 +502,27 @@ def api_review():
     # Trigger pipelines
     pipeline_results = {}
     if status == "approved":
-        export_res = run_script([
-            "node", str(SCRIPTS / "export-carousel.mjs"),
-            str(DESIGN_SYSTEM / file), "--carousel", cid,
-        ])
+        export_res = run_script(
+            [
+                "node",
+                str(SCRIPTS / "export-carousel.mjs"),
+                str(DESIGN_SYSTEM / file),
+                "--carousel",
+                cid,
+            ]
+        )
         pipeline_results["export"] = export_res
         if export_res.get("ok"):
-            org_res = run_script([
-                sys.executable, str(SCRIPTS / "organize-approved.py"),
-                "--carousel", cid, "--source", Path(file).stem,
-            ])
+            org_res = run_script(
+                [
+                    sys.executable,
+                    str(SCRIPTS / "organize-approved.py"),
+                    "--carousel",
+                    cid,
+                    "--source",
+                    Path(file).stem,
+                ]
+            )
             pipeline_results["organize"] = org_res
 
     profile_res = run_script([sys.executable, str(SCRIPTS / "update-profile.py")])
@@ -506,7 +547,9 @@ def api_revise():
     ts = data.get("timestamp", datetime.now().isoformat())
 
     if not file or not cid or not instructions:
-        return jsonify({"ok": False, "error": "file, cid, instructions are required"}), 400
+        return jsonify(
+            {"ok": False, "error": "file, cid, instructions are required"}
+        ), 400
 
     # 1. Update reviews.json — mark as revision_requested
     reviews = load_reviews()
@@ -525,8 +568,8 @@ def api_revise():
         log_entry += f"- **tags:** {', '.join(f'`{t}`' for t in tags)}\n"
     log_entry += f"- **slides afetados:** {affected_slides}\n"
     log_entry += f"- **instruções:** {instructions}\n"
-    log_entry += f"- **status:** pending\n"
-    log_entry += f"- **revision_round:** 1\n"
+    log_entry += "- **status:** pending\n"
+    log_entry += "- **revision_round:** 1\n"
     with REVISIONS_FILE.open("a", encoding="utf-8") as f_out:
         f_out.write(log_entry)
 
@@ -540,7 +583,7 @@ def api_revise():
 > Fonte original: `design-system/{file}`
 > Carrossel: `{cid}`
 > Slides afetados: {affected_slides}
-> Tags: {', '.join(tags) if tags else '(nenhuma)'}
+> Tags: {", ".join(tags) if tags else "(nenhuma)"}
 
 ## Instruções do usuário (literal)
 
@@ -561,26 +604,34 @@ Leia também a última versão do PROFILE para entender padrões já aprovados e
     brief_path.write_text(brief_content, encoding="utf-8")
 
     # 4. Append to revision queue
-    queue = json.loads(REVISIONS_QUEUE.read_text()) if REVISIONS_QUEUE.exists() else {"pending": [], "processing": [], "done": []}
-    queue["pending"].append({
-        "file": file,
-        "cid": cid,
-        "brief_path": str(brief_path.relative_to(REPO_ROOT)),
-        "tags": tags,
-        "affected_slides": affected_slides,
-        "instructions": instructions,
-        "timestamp": ts,
-    })
+    queue = (
+        json.loads(REVISIONS_QUEUE.read_text())
+        if REVISIONS_QUEUE.exists()
+        else {"pending": [], "processing": [], "done": []}
+    )
+    queue["pending"].append(
+        {
+            "file": file,
+            "cid": cid,
+            "brief_path": str(brief_path.relative_to(REPO_ROOT)),
+            "tags": tags,
+            "affected_slides": affected_slides,
+            "instructions": instructions,
+            "timestamp": ts,
+        }
+    )
     REVISIONS_QUEUE.write_text(json.dumps(queue, indent=2, ensure_ascii=False))
 
     # 5. Trigger profile regen (lightweight)
     run_script([sys.executable, str(SCRIPTS / "update-profile.py")])
 
-    return jsonify({
-        "ok": True,
-        "brief_path": str(brief_path.relative_to(REPO_ROOT)),
-        "queue_pending": len(queue["pending"]),
-    })
+    return jsonify(
+        {
+            "ok": True,
+            "brief_path": str(brief_path.relative_to(REPO_ROOT)),
+            "queue_pending": len(queue["pending"]),
+        }
+    )
 
 
 @app.route("/api/queue")
@@ -599,6 +650,7 @@ def api_regen_profile():
 # ─────────────────────────────────────────────────────────────────
 # POSTING QUEUE
 # ─────────────────────────────────────────────────────────────────
+
 
 def load_posting_queue() -> dict:
     if POSTING_QUEUE_FILE.exists():
@@ -622,15 +674,20 @@ def _parse_cid_title_from_html(source_html: Path, cid: str) -> str:
         text = source_html.read_text(encoding="utf-8")
         # find the section with id=cid
         import re
+
         m = re.search(rf'<section[^>]*id="{cid}"[^>]*>(.*?)</section>', text, re.DOTALL)
         if not m:
             return cid
         chunk = m.group(1)
         # find first non-empty heading
-        head = re.search(r'<(?:h1|h2|div[^>]*class="[^"]*(?:display|cover|headline)[^"]*")[^>]*>(.*?)</', chunk, re.DOTALL)
+        head = re.search(
+            r'<(?:h1|h2|div[^>]*class="[^"]*(?:display|cover|headline)[^"]*")[^>]*>(.*?)</',
+            chunk,
+            re.DOTALL,
+        )
         if head:
-            raw = re.sub(r'<[^>]+>', '', head.group(1))
-            raw = re.sub(r'\s+', ' ', raw).strip()
+            raw = re.sub(r"<[^>]+>", "", head.group(1))
+            raw = re.sub(r"\s+", " ", raw).strip()
             return raw[:80] or cid
         return cid
     except Exception:
@@ -641,15 +698,18 @@ def rebuild_posting_queue() -> dict:
     """Scan reviews.json, pull all approved, merge with existing queue, return fresh dict."""
     reviews = load_reviews()
     existing = load_posting_queue()
-    existing_by_key = {(it["source"], it["cid"]): it for it in existing.get("items", [])}
+    existing_by_key = {
+        (it["source"], it["cid"]): it for it in existing.get("items", [])
+    }
 
     # Dedupe by (family, cid) where family strips -revN suffix
     # E.g., carousels-v1.html and carousels-v1-rev1.html belong to same "v1" family
     # But carousels-v4.html is a different family (separate carousel set)
     import re
+
     def family_of(source: str) -> str:
         stem = Path(source).stem
-        return re.sub(r'-rev\d+$', '', stem)
+        return re.sub(r"-rev\d+$", "", stem)
 
     best_by_family_cid = {}  # (family, cid) -> best source
     for source, cids in reviews.items():
@@ -709,21 +769,35 @@ def queue_page():
     for i, item in enumerate(queue["items"]):
         status = item.get("status", "pending")
         status_color = {
-            "pending": "#8A8A8A", "exporting": "#FFE600", "organizing": "#FFE600",
-            "captioning": "#FFE600", "publishing": "#00F0FF", "done": "#B0FF3C",
-            "failed": "#FF6B6B", "skipped": "#5A5A5A", "scheduled": "#FF9F43",
+            "pending": "#8A8A8A",
+            "exporting": "#FFE600",
+            "organizing": "#FFE600",
+            "captioning": "#FFE600",
+            "publishing": "#00F0FF",
+            "done": "#B0FF3C",
+            "failed": "#FF6B6B",
+            "skipped": "#5A5A5A",
+            "scheduled": "#FF9F43",
         }.get(status, "#8A8A8A")
         title = item.get("title", "")[:70]
         source = item["source"]
         cid = item["cid"]
         post_url = item.get("post_url") or ""
-        post_link = f'<a href="{post_url}" target="_blank" style="color:#B0FF3C;font-size:10px;">📎 post</a>' if post_url else ""
+        post_link = (
+            f'<a href="{post_url}" target="_blank" style="color:#B0FF3C;font-size:10px;">📎 post</a>'
+            if post_url
+            else ""
+        )
         scheduled = item.get("scheduled_for") or ""
-        sched_badge = f'<span class="q-sched">🕐 {scheduled[:16].replace("T"," ")}</span>' if scheduled else ""
+        sched_badge = (
+            f'<span class="q-sched">🕐 {scheduled[:16].replace("T", " ")}</span>'
+            if scheduled
+            else ""
+        )
         rows_html += f"""
         <li class="q-item" data-idx="{i}" draggable="true">
           <div class="q-drag">⋮⋮</div>
-          <div class="q-order">{i+1:02d}</div>
+          <div class="q-order">{i + 1:02d}</div>
           <div class="q-main" onclick="toggleDetail({i}, event)">
             <div class="q-title">{title} <span class="q-expand-icon">▸</span></div>
             <div class="q-sub">{source} · {cid} {sched_badge}</div>
@@ -1047,8 +1121,16 @@ def queue_page():
     </body>
     </html>
     """
-    empty_msg = '<div class="empty">fila vazia — aprove carrosséis no dashboard primeiro</div>' if not queue["items"] else ""
-    return html.replace("{count}", str(len(queue["items"]))).replace("{rows}", rows_html).replace("{empty}", empty_msg)
+    empty_msg = (
+        '<div class="empty">fila vazia — aprove carrosséis no dashboard primeiro</div>'
+        if not queue["items"]
+        else ""
+    )
+    return (
+        html.replace("{count}", str(len(queue["items"])))
+        .replace("{rows}", rows_html)
+        .replace("{empty}", empty_msg)
+    )
 
 
 @app.route("/api/queue/posting")
@@ -1091,16 +1173,22 @@ def api_queue_item_detail(idx):
         slides_dir = folder / "slides"
         if slides_dir.exists():
             slides = sorted(slides_dir.glob("*.png"))
-            detail["slides"] = [f"/api/queue/slide/{approved_date}/{folder.name}/{s.name}" for s in slides]
+            detail["slides"] = [
+                f"/api/queue/slide/{approved_date}/{folder.name}/{s.name}"
+                for s in slides
+            ]
             detail["slide_count"] = len(slides)
 
         caption_file = folder / "caption.md"
         if caption_file.exists():
             import re as _re
+
             raw = caption_file.read_text()
             detail["caption_raw"] = raw
             # Extract just the "Post caption" section for display
-            m = _re.search(r"## Post caption[^\n]*\n+(.+?)(?=\n## |\Z)", raw, _re.DOTALL)
+            m = _re.search(
+                r"## Post caption[^\n]*\n+(.+?)(?=\n## |\Z)", raw, _re.DOTALL
+            )
             detail["caption"] = m.group(1).strip() if m else raw[:800]
 
         meta_file = folder / "metadata.json"
@@ -1151,7 +1239,12 @@ def api_queue_reorder():
     queue = load_posting_queue()
     items = queue.get("items", [])
     if len(order) != len(items):
-        return jsonify({"ok": False, "error": f"order length mismatch ({len(order)} vs {len(items)})"}), 400
+        return jsonify(
+            {
+                "ok": False,
+                "error": f"order length mismatch ({len(order)} vs {len(items)})",
+            }
+        ), 400
     try:
         new_items = [items[i] for i in order]
     except IndexError:
@@ -1176,10 +1269,17 @@ def api_queue_prepare():
 
         # Only prepare items that need export/caption (don't ship here)
         cmd = [
-            sys.executable, str(SCRIPTS / "ship-queue.py"),
-            "--dry-run", "--delay", "0", "--item", str(idx),
+            sys.executable,
+            str(SCRIPTS / "ship-queue.py"),
+            "--dry-run",
+            "--delay",
+            "0",
+            "--item",
+            str(idx),
         ]
-        res = subprocess.run(cmd, cwd=REPO_ROOT, capture_output=True, text=True, timeout=600)
+        res = subprocess.run(
+            cmd, cwd=REPO_ROOT, capture_output=True, text=True, timeout=600
+        )
         if res.returncode == 0:
             prepared += 1
         else:
@@ -1202,7 +1302,9 @@ def api_queue_ship():
     log_file = OUTPUT / "approved" / "queue" / "ship.log"
     log_file.parent.mkdir(parents=True, exist_ok=True)
     log_fh = open(log_file, "a")
-    log_fh.write(f"\n\n━━ ship started at {datetime.now().isoformat()} (dry_run={dry_run}) ━━\n")
+    log_fh.write(
+        f"\n\n━━ ship started at {datetime.now().isoformat()} (dry_run={dry_run}) ━━\n"
+    )
     log_fh.flush()
 
     try:
@@ -1210,12 +1312,19 @@ def api_queue_ship():
     except Exception as e:
         return jsonify({"ok": False, "error": str(e)}), 500
 
-    return jsonify({"ok": True, "log_file": str(log_file.relative_to(REPO_ROOT)), "dry_run": dry_run, "delay": delay})
+    return jsonify(
+        {
+            "ok": True,
+            "log_file": str(log_file.relative_to(REPO_ROOT)),
+            "dry_run": dry_run,
+            "delay": delay,
+        }
+    )
 
 
 if __name__ == "__main__":
     port = int(os.environ.get("GROWTHOS_REVIEW_PORT", "5050"))
-    print(f"\n🎬 GrowthOS Review Dashboard")
+    print("\n🎬 GrowthOS Review Dashboard")
     print(f"   http://localhost:{port}")
     print(f"   design-system: {DESIGN_SYSTEM}")
     print(f"   reviews: {REVIEWS_FILE}\n")

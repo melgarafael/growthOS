@@ -199,7 +199,9 @@ class TestPublishSubcommand:
     def test_all_platforms_recognized(self):
         for platform in PLATFORMS:
             result = route(f"publish {platform} test content")
-            assert result.args["platform"] == platform, f"Failed for platform: {platform}"
+            assert result.args["platform"] == platform, (
+                f"Failed for platform: {platform}"
+            )
 
 
 # ── Subcommand: analyze ────────────────────────────────────────────
@@ -288,38 +290,41 @@ class TestReportSubcommand:
 class TestNLPIntentClassification:
     """AC1/AC3: Natural language routes through CMO intent classification."""
 
-    @pytest.mark.parametrize("input_text,expected_intent", [
-        # Strategy intents — unambiguous verb
-        ("plan our Q2 marketing strategy", Intent.STRATEGY),
-        ("define OKRs for the marketing team", Intent.STRATEGY),
-        ("strategize our go-to-market approach", Intent.STRATEGY),
-        # Create intents
-        ("write a blog post about AI in healthcare", Intent.CREATE),
-        ("draft a newsletter for this week", Intent.CREATE),
-        ("write email copy for our onboarding sequence", Intent.CREATE),
-        # Publish intents
-        ("publish this to LinkedIn", Intent.PUBLISH),
-        ("schedule a tweet for tomorrow", Intent.PUBLISH),
-        ("share this across all platforms", Intent.PUBLISH),
-        # Analyze intents
-        ("analyze our top 3 competitors", Intent.ANALYZE),
-        ("do a SWOT analysis for our positioning", Intent.ANALYZE),
-        ("benchmark our content against competitors", Intent.ANALYZE),
-        # Research intents
-        ("research the best practices for B2B email marketing", Intent.RESEARCH),
-        ("explore emerging platforms for developer marketing", Intent.RESEARCH),
-        ("investigate the ROI of podcast marketing", Intent.RESEARCH),
-        # Report intents
-        ("generate a monthly marketing report", Intent.REPORT),
-        ("show me our content performance metrics", Intent.REPORT),
-        ("summarize our social media results", Intent.REPORT),
-        # Visual intents — unambiguous verb
-        ("design a social graphic for our product launch", Intent.VISUAL),
-        ("make a social graphic for our product launch", Intent.VISUAL),
-        # Landing intents
-        ("build a landing page for our new product", Intent.LANDING),
-        ("optimize our sign-up page conversion rate", Intent.LANDING),
-    ])
+    @pytest.mark.parametrize(
+        "input_text,expected_intent",
+        [
+            # Strategy intents — unambiguous verb
+            ("plan our Q2 marketing strategy", Intent.STRATEGY),
+            ("define OKRs for the marketing team", Intent.STRATEGY),
+            ("strategize our go-to-market approach", Intent.STRATEGY),
+            # Create intents
+            ("write a blog post about AI in healthcare", Intent.CREATE),
+            ("draft a newsletter for this week", Intent.CREATE),
+            ("write email copy for our onboarding sequence", Intent.CREATE),
+            # Publish intents
+            ("publish this to LinkedIn", Intent.PUBLISH),
+            ("schedule a tweet for tomorrow", Intent.PUBLISH),
+            ("share this across all platforms", Intent.PUBLISH),
+            # Analyze intents
+            ("analyze our top 3 competitors", Intent.ANALYZE),
+            ("do a SWOT analysis for our positioning", Intent.ANALYZE),
+            ("benchmark our content against competitors", Intent.ANALYZE),
+            # Research intents
+            ("research the best practices for B2B email marketing", Intent.RESEARCH),
+            ("explore emerging platforms for developer marketing", Intent.RESEARCH),
+            ("investigate the ROI of podcast marketing", Intent.RESEARCH),
+            # Report intents
+            ("generate a monthly marketing report", Intent.REPORT),
+            ("show me our content performance metrics", Intent.REPORT),
+            ("summarize our social media results", Intent.REPORT),
+            # Visual intents — unambiguous verb
+            ("design a social graphic for our product launch", Intent.VISUAL),
+            ("make a social graphic for our product launch", Intent.VISUAL),
+            # Landing intents
+            ("build a landing page for our new product", Intent.LANDING),
+            ("optimize our sign-up page conversion rate", Intent.LANDING),
+        ],
+    )
     def test_nlp_classification(self, input_text, expected_intent):
         result = classify_intent(input_text)
         assert result.intent == expected_intent, (
@@ -328,15 +333,29 @@ class TestNLPIntentClassification:
         assert result.agent == AGENT_MAP[expected_intent]
         assert result.confidence > 0
 
-    @pytest.mark.parametrize("input_text,acceptable_intents", [
-        # "create" + strategy object → verb wins (create) but strategy is also valid
-        ("create a content calendar for next month", {Intent.CREATE, Intent.STRATEGY}),
-        # "design" + strategy object → verb wins (visual) but strategy is also valid
-        ("design a go-to-market plan for our launch", {Intent.VISUAL, Intent.STRATEGY}),
-        # "create" + visual object → verb wins (create) but visual is also valid
-        ("create a thumbnail for our YouTube video", {Intent.CREATE, Intent.VISUAL}),
-    ])
-    def test_ambiguous_inputs_route_to_acceptable_intent(self, input_text, acceptable_intents):
+    @pytest.mark.parametrize(
+        "input_text,acceptable_intents",
+        [
+            # "create" + strategy object → verb wins (create) but strategy is also valid
+            (
+                "create a content calendar for next month",
+                {Intent.CREATE, Intent.STRATEGY},
+            ),
+            # "design" + strategy object → verb wins (visual) but strategy is also valid
+            (
+                "design a go-to-market plan for our launch",
+                {Intent.VISUAL, Intent.STRATEGY},
+            ),
+            # "create" + visual object → verb wins (create) but visual is also valid
+            (
+                "create a thumbnail for our YouTube video",
+                {Intent.CREATE, Intent.VISUAL},
+            ),
+        ],
+    )
+    def test_ambiguous_inputs_route_to_acceptable_intent(
+        self, input_text, acceptable_intents
+    ):
         """Edge cases where verb and object suggest different intents.
         In runtime, the CMO (Claude) resolves these with semantic understanding.
         The deterministic parser picks based on verb priority, which is acceptable."""

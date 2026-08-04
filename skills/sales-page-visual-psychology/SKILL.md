@@ -265,6 +265,8 @@ Use the Utopia-style fluid spacing from DESIGN-DOCTRINE.md Section F:
 
 #### 6a. Animation Style Selection
 
+**Default:** read `providers.website_animation_strategy` from `brand-voice.yaml` (currently `cinematic`) and use it as the starting point — pick the richest tier the archetype and DESIGN-DOCTRINE Section E allow, capped at that default. Only go below it when the briefing, archetype, or a concrete constraint (mobile-heavy audience, utility product) justifies less motion; document that override explicitly in the "Selected because" block below. This stays CSS-only (Tier 2-4 in sales-page-builder's Section D) — no Framer/Motion or other JS animation library, to preserve the single-file, zero-external-dependency architecture of `landing-page-design` / `sales-page-builder`.
+
 Based on DESIGN-DOCTRINE.md Section E and the archetype:
 
 ```markdown

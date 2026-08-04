@@ -1,0 +1,20 @@
+{
+  "mcpServers": {
+    "growthos-social-publish": {
+      "command": "python3",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/mcp-servers/mcp-social-publish/server.py"]
+    },
+    "growthos-social-discover": {
+      "command": "python3",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/mcp-servers/mcp-social-discover/server.py"]
+    },
+    "growthos-obsidian-vault": {
+      "command": "python3",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/mcp-servers/mcp-obsidian-vault/server.py"]
+    },
+    "growthos-remotion-render": {
+      "command": "python3",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/mcp-servers/mcp-remotion-render/server.py"]
+    }
+  }
+}

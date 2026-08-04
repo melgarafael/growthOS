@@ -33,7 +33,8 @@ def find_brief_for_source(source: str) -> Path | None:
     """Try to locate the brief file matching the carousel source."""
     candidates = [
         DESIGN_SYSTEM / f"BRIEF-{source.upper()}.md",
-        DESIGN_SYSTEM / f"BRIEF-10-CAROUSELS-{source.upper().replace('CAROUSELS-', '')}.md",
+        DESIGN_SYSTEM
+        / f"BRIEF-10-CAROUSELS-{source.upper().replace('CAROUSELS-', '')}.md",
     ]
     for c in candidates:
         if c.exists():
@@ -54,7 +55,9 @@ def extract_carousel_info(brief: Path, cid: str) -> dict:
     lines = text.split("\n")
 
     # match "### 04 — SOMETHING" or "### C04 ..." or "### 4 — ..."
-    num_pattern = re.compile(rf"^###\s+0?{cid.lstrip('c').lstrip('C').lstrip('0') or '0'}\b")
+    num_pattern = re.compile(
+        rf"^###\s+0?{cid.lstrip('c').lstrip('C').lstrip('0') or '0'}\b"
+    )
     alt_pattern = re.compile(rf"^###\s+{cid}\b", re.IGNORECASE)
 
     start = None
@@ -68,7 +71,7 @@ def extract_carousel_info(brief: Path, cid: str) -> dict:
 
     # Read until next ### or EOF
     chunk = []
-    for line in lines[start + 1:]:
+    for line in lines[start + 1 :]:
         if line.startswith("### "):
             break
         chunk.append(line)
@@ -107,7 +110,9 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--carousel", required=True, help="carousel id e.g. c04")
     parser.add_argument("--source", required=True, help="source stem e.g. carousels-v3")
-    parser.add_argument("--date", default=str(date.today()), help="target date YYYY-MM-DD")
+    parser.add_argument(
+        "--date", default=str(date.today()), help="target date YYYY-MM-DD"
+    )
     args = parser.parse_args()
 
     cid = args.carousel
@@ -127,7 +132,11 @@ def main():
 
     # 2. Extract brief info
     brief = find_brief_for_source(source)
-    info = extract_carousel_info(brief, cid) if brief else {"title": cid, "category": "unknown", "code": "", "bonus": ""}
+    info = (
+        extract_carousel_info(brief, cid)
+        if brief
+        else {"title": cid, "category": "unknown", "code": "", "bonus": ""}
+    )
     slug = slugify(info.get("title", cid))
 
     # 3. Create approved folder
@@ -157,7 +166,9 @@ def main():
         "approved_at": datetime.now().isoformat(),
         "approved_date": args.date,
     }
-    (approved_dir / "metadata.json").write_text(json.dumps(metadata, indent=2, ensure_ascii=False))
+    (approved_dir / "metadata.json").write_text(
+        json.dumps(metadata, indent=2, ensure_ascii=False)
+    )
 
     # 6. Write post-status.json
     post_status = {
@@ -183,9 +194,9 @@ def main():
 
     print(f"✅ organized {cid} → {approved_dir.relative_to(GROWTHOS)}")
     print(f"   {len(pngs)} slides")
-    print(f"   metadata.json ✓")
-    print(f"   post-status.json ✓ (draft)")
-    print(f"   caption.md placeholder ✓")
+    print("   metadata.json ✓")
+    print("   post-status.json ✓ (draft)")
+    print("   caption.md placeholder ✓")
 
 
 if __name__ == "__main__":

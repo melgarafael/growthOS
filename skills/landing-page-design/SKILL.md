@@ -251,6 +251,33 @@ All pages must work across breakpoints:
 - Minimal CSS — no unused selectors
 - System font stack — zero font loading time
 
+## Motion & Interaction (Default Standard)
+
+Every landing page produced by this skill ships with a baseline motion layer unless the
+brief explicitly asks for a static page. This became the default after the Robnet Solutions
+"clínicas" landing page (`output/landing-pages/clinicas-agente-ia/`) added it per client request
+and it read as a clear quality upgrade over the static baseline.
+
+Apply all four, vanilla CSS/JS only (no framework — see Anti-Patterns):
+
+1. **Hero background motion** — 2-3 soft blurred gradient blobs (`filter: blur()`, low opacity,
+   `@keyframes` drifting `translate`/`scale` on an 15-20s loop) behind the hero content, `z-index: 0`,
+   `pointer-events: none`. Never parallax or animate the hero text/headline itself — see
+   `design-intelligence/references/patterns/hero-sections.md` for why LCP-critical content stays static.
+2. **Reveal-on-scroll** on every section below the hero — fade + translateY(24-28px) via
+   `IntersectionObserver` adding `.is-visible`, per the "Fade-Up on Enter" recipe in
+   `design-intelligence/references/patterns/scroll-animations.md`.
+3. **Parallax on hero illustration only** (never on text/background images with copy) — scroll-linked
+   `translateY`, capped and throttled with `requestAnimationFrame`. See "Parallax Background" in the
+   same file; keep displacement subtle (≤15% of element height).
+4. **Text-roll hover on every `.btn-primary`** — vertical label-swap on hover, documented as the
+   "Text Roll" variant in `design-intelligence/references/techniques/micro-interactions.md`. Duplicate
+   the label in two stacked spans, second one `aria-hidden`.
+
+All four respect `prefers-reduced-motion: reduce` (disable animation/transition, snap reveals to
+visible, no transform) and use only `transform`/`opacity` for GPU compositing — keep the
+Performance Budget above intact.
+
 ## A/B Testing Variants
 
 When generating a landing page, always produce a primary version and specify testable variants:

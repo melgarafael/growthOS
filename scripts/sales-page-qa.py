@@ -30,16 +30,17 @@ import re
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
-from urllib.parse import urljoin
 
 try:
     from playwright.sync_api import sync_playwright
 except ImportError:
-    print("ERROR: playwright not installed. Run: uv pip install playwright && playwright install chromium")
+    print(
+        "ERROR: playwright not installed. Run: uv pip install playwright && playwright install chromium"
+    )
     sys.exit(2)
 
 try:
-    from bs4 import BeautifulSoup
+    import bs4  # noqa: F401
 except ImportError:
     print("ERROR: beautifulsoup4 not installed. Run: uv pip install beautifulsoup4")
     sys.exit(2)
@@ -53,12 +54,19 @@ VIEWPORTS = [
 ]
 
 PLACEHOLDER_PATTERNS = [
-    r"\blorem\b", r"\bipsum\b", r"\bplaceholder\b",
-    r"\bTODO\b", r"\bFIXME\b", r"\[TBD\]", r"\[PLACEHOLDER\]",
+    r"\blorem\b",
+    r"\bipsum\b",
+    r"\bplaceholder\b",
+    r"\bTODO\b",
+    r"\bFIXME\b",
+    r"\[TBD\]",
+    r"\[PLACEHOLDER\]",
 ]
 
 BROKEN_TOKEN_PATTERNS = [
-    r"\{\{[^}]+\}\}", r"\{[a-z_]+\}", r"%[sd]",
+    r"\{\{[^}]+\}\}",
+    r"\{[a-z_]+\}",
+    r"%[sd]",
 ]
 
 
@@ -89,7 +97,12 @@ class QAReport:
         passed = sum(1 for r in self.results if r.status == "PASS")
         failed = sum(1 for r in self.results if r.status == "FAIL")
         warned = sum(1 for r in self.results if r.status == "WARN")
-        return {"total": len(self.results), "passed": passed, "failed": failed, "warnings": warned}
+        return {
+            "total": len(self.results),
+            "passed": passed,
+            "failed": failed,
+            "warnings": warned,
+        }
 
     def compute_verdict(self):
         critical_categories = {"functional", "content"}
@@ -111,13 +124,22 @@ def run_functional_checks(page, report: QAReport):
     """Category 1: Functional checks."""
     # Page loads
     console_errors = []
-    page.on("console", lambda msg: console_errors.append(msg.text) if msg.type == "error" else None)
+    page.on(
+        "console",
+        lambda msg: console_errors.append(msg.text) if msg.type == "error" else None,
+    )
 
     try:
         response = page.reload(wait_until="networkidle")
         status = response.status if response else 0
-        report.add(CheckResult("functional", "Page loads", "PASS" if status == 200 else "FAIL",
-                               f"HTTP {status}"))
+        report.add(
+            CheckResult(
+                "functional",
+                "Page loads",
+                "PASS" if status == 200 else "FAIL",
+                f"HTTP {status}",
+            )
+        )
     except Exception as e:
         report.add(CheckResult("functional", "Page loads", "FAIL", str(e)))
         return  # Can't continue if page doesn't load
@@ -131,30 +153,43 @@ def run_functional_checks(page, report: QAReport):
             target_id = href[1:]
             if target_id and not page.query_selector(f"#{target_id}"):
                 broken_links.append(href)
-    report.add(CheckResult(
-        "functional", "Internal links work",
-        "PASS" if not broken_links else "FAIL",
-        f"Broken: {broken_links}" if broken_links else f"{len(links)} links checked"
-    ))
+    report.add(
+        CheckResult(
+            "functional",
+            "Internal links work",
+            "PASS" if not broken_links else "FAIL",
+            f"Broken: {broken_links}"
+            if broken_links
+            else f"{len(links)} links checked",
+        )
+    )
 
     # CTAs clickable
-    ctas = page.query_selector_all("[data-cta], .cta, button[type='submit'], a.cta-button, a.btn-primary")
+    ctas = page.query_selector_all(
+        "[data-cta], .cta, button[type='submit'], a.cta-button, a.btn-primary"
+    )
     cta_issues = []
     for cta in ctas:
         if not cta.is_visible():
             cta_issues.append(f"CTA not visible: {cta.text_content()[:30]}")
-    report.add(CheckResult(
-        "functional", "CTAs clickable",
-        "PASS" if not cta_issues else "FAIL",
-        "; ".join(cta_issues) if cta_issues else f"{len(ctas)} CTAs verified"
-    ))
+    report.add(
+        CheckResult(
+            "functional",
+            "CTAs clickable",
+            "PASS" if not cta_issues else "FAIL",
+            "; ".join(cta_issues) if cta_issues else f"{len(ctas)} CTAs verified",
+        )
+    )
 
     # Console errors
-    report.add(CheckResult(
-        "functional", "No console errors",
-        "PASS" if not console_errors else "WARN",
-        "; ".join(console_errors[:5]) if console_errors else "Clean console"
-    ))
+    report.add(
+        CheckResult(
+            "functional",
+            "No console errors",
+            "PASS" if not console_errors else "WARN",
+            "; ".join(console_errors[:5]) if console_errors else "Clean console",
+        )
+    )
 
 
 def run_visual_checks(page, report: QAReport, screenshot_dir: Path):
@@ -172,11 +207,14 @@ def run_visual_checks(page, report: QAReport, screenshot_dir: Path):
 
         # Horizontal overflow
         overflow = page.evaluate("document.body.scrollWidth > window.innerWidth")
-        report.add(CheckResult(
-            "visual", f"No overflow at {vp['width']}px",
-            "PASS" if not overflow else "FAIL",
-            f"scrollWidth={page.evaluate('document.body.scrollWidth')}, viewport={vp['width']}"
-        ))
+        report.add(
+            CheckResult(
+                "visual",
+                f"No overflow at {vp['width']}px",
+                "PASS" if not overflow else "FAIL",
+                f"scrollWidth={page.evaluate('document.body.scrollWidth')}, viewport={vp['width']}",
+            )
+        )
 
         # Text readability (min font-size)
         min_size = 14 if vp["width"] < 768 else 16
@@ -191,22 +229,30 @@ def run_visual_checks(page, report: QAReport, screenshot_dir: Path):
             }});
             return tooSmall.slice(0, 5);
         }}""")
-        report.add(CheckResult(
-            "visual", f"Text readable at {vp['width']}px",
-            "PASS" if not small_text else "WARN",
-            f"Small text found: {small_text}" if small_text else f"All text >= {min_size}px"
-        ))
+        report.add(
+            CheckResult(
+                "visual",
+                f"Text readable at {vp['width']}px",
+                "PASS" if not small_text else "WARN",
+                f"Small text found: {small_text}"
+                if small_text
+                else f"All text >= {min_size}px",
+            )
+        )
 
 
 def run_performance_checks(target_path: str, report: QAReport):
     """Category 3: Performance checks."""
     file_size = os.path.getsize(target_path)
     size_kb = file_size / 1024
-    report.add(CheckResult(
-        "performance", "File size < 200KB",
-        "PASS" if size_kb < 200 else "WARN",
-        f"{size_kb:.1f}KB"
-    ))
+    report.add(
+        CheckResult(
+            "performance",
+            "File size < 200KB",
+            "PASS" if size_kb < 200 else "WARN",
+            f"{size_kb:.1f}KB",
+        )
+    )
 
     # Check for external resource references
     with open(target_path, "r", encoding="utf-8") as f:
@@ -222,11 +268,16 @@ def run_performance_checks(target_path: str, report: QAReport):
         matches = re.findall(pattern, content)
         external_refs.extend(matches)
 
-    report.add(CheckResult(
-        "performance", "No external requests",
-        "PASS" if not external_refs else "WARN",
-        f"External refs: {len(external_refs)}" if external_refs else "All assets inline"
-    ))
+    report.add(
+        CheckResult(
+            "performance",
+            "No external requests",
+            "PASS" if not external_refs else "WARN",
+            f"External refs: {len(external_refs)}"
+            if external_refs
+            else "All assets inline",
+        )
+    )
 
 
 def run_content_checks(page, state: dict, report: QAReport):
@@ -239,11 +290,14 @@ def run_content_checks(page, state: dict, report: QAReport):
         matches = re.findall(pattern, page_text, re.IGNORECASE)
         if matches:
             placeholder_found.extend(matches[:3])
-    report.add(CheckResult(
-        "content", "No placeholder text",
-        "PASS" if not placeholder_found else "FAIL",
-        f"Found: {placeholder_found}" if placeholder_found else "Clean content"
-    ))
+    report.add(
+        CheckResult(
+            "content",
+            "No placeholder text",
+            "PASS" if not placeholder_found else "FAIL",
+            f"Found: {placeholder_found}" if placeholder_found else "Clean content",
+        )
+    )
 
     # Check for broken template tokens
     token_found = []
@@ -251,11 +305,14 @@ def run_content_checks(page, state: dict, report: QAReport):
         matches = re.findall(pattern, page_text)
         if matches:
             token_found.extend(matches[:3])
-    report.add(CheckResult(
-        "content", "No broken tokens",
-        "PASS" if not token_found else "FAIL",
-        f"Found: {token_found}" if token_found else "No template tokens"
-    ))
+    report.add(
+        CheckResult(
+            "content",
+            "No broken tokens",
+            "PASS" if not token_found else "FAIL",
+            f"Found: {token_found}" if token_found else "No template tokens",
+        )
+    )
 
     # Validate Phase 5 headlines if state available
     phase_5 = state.get("phases", {}).get("phase_5", {}).get("output", {})
@@ -266,22 +323,30 @@ def run_content_checks(page, state: dict, report: QAReport):
         if headline and headline not in page_text:
             missing_headlines.append(headline[:50])
     if sections:
-        report.add(CheckResult(
-            "content", "Headlines match Phase 5",
-            "PASS" if not missing_headlines else "FAIL",
-            f"Missing: {missing_headlines}" if missing_headlines else f"{len(sections)} headlines verified"
-        ))
+        report.add(
+            CheckResult(
+                "content",
+                "Headlines match Phase 5",
+                "PASS" if not missing_headlines else "FAIL",
+                f"Missing: {missing_headlines}"
+                if missing_headlines
+                else f"{len(sections)} headlines verified",
+            )
+        )
 
 
 def run_accessibility_checks(page, report: QAReport):
     """Category 5: Accessibility checks."""
     # Single H1
     h1_count = page.evaluate("document.querySelectorAll('h1').length")
-    report.add(CheckResult(
-        "accessibility", "Single H1",
-        "PASS" if h1_count == 1 else "WARN",
-        f"Found {h1_count} H1 elements"
-    ))
+    report.add(
+        CheckResult(
+            "accessibility",
+            "Single H1",
+            "PASS" if h1_count == 1 else "WARN",
+            f"Found {h1_count} H1 elements",
+        )
+    )
 
     # Heading hierarchy (no skipped levels)
     headings = page.evaluate("""() => {
@@ -293,11 +358,14 @@ def run_accessibility_checks(page, report: QAReport):
         if headings[i] > headings[i - 1] + 1:
             skipped = True
             break
-    report.add(CheckResult(
-        "accessibility", "No skipped heading levels",
-        "PASS" if not skipped else "WARN",
-        f"Heading sequence: {headings[:10]}"
-    ))
+    report.add(
+        CheckResult(
+            "accessibility",
+            "No skipped heading levels",
+            "PASS" if not skipped else "WARN",
+            f"Heading sequence: {headings[:10]}",
+        )
+    )
 
     # Alt texts on images
     imgs_without_alt = page.evaluate("""() => {
@@ -305,19 +373,29 @@ def run_accessibility_checks(page, report: QAReport):
         return Array.from(imgs).filter(i => !i.alt || i.alt.trim() === '').length;
     }""")
     total_imgs = page.evaluate("document.querySelectorAll('img').length")
-    report.add(CheckResult(
-        "accessibility", "All images have alt text",
-        "PASS" if imgs_without_alt == 0 else "FAIL",
-        f"{imgs_without_alt}/{total_imgs} images missing alt" if imgs_without_alt else f"{total_imgs} images OK"
-    ))
+    report.add(
+        CheckResult(
+            "accessibility",
+            "All images have alt text",
+            "PASS" if imgs_without_alt == 0 else "FAIL",
+            f"{imgs_without_alt}/{total_imgs} images missing alt"
+            if imgs_without_alt
+            else f"{total_imgs} images OK",
+        )
+    )
 
     # Skip navigation link
-    skip_link = page.query_selector('a[href="#main"], a[href="#content"], .skip-nav, .skip-link')
-    report.add(CheckResult(
-        "accessibility", "Skip navigation link",
-        "PASS" if skip_link else "WARN",
-        "Skip link found" if skip_link else "No skip navigation link found"
-    ))
+    skip_link = page.query_selector(
+        'a[href="#main"], a[href="#content"], .skip-nav, .skip-link'
+    )
+    report.add(
+        CheckResult(
+            "accessibility",
+            "Skip navigation link",
+            "PASS" if skip_link else "WARN",
+            "Skip link found" if skip_link else "No skip navigation link found",
+        )
+    )
 
     # Interactive elements have accessible names
     unlabeled = page.evaluate("""() => {
@@ -333,11 +411,14 @@ def run_accessibility_checks(page, report: QAReport):
         });
         return count;
     }""")
-    report.add(CheckResult(
-        "accessibility", "Interactive elements labeled",
-        "PASS" if unlabeled == 0 else "WARN",
-        f"{unlabeled} unlabeled elements" if unlabeled else "All elements labeled"
-    ))
+    report.add(
+        CheckResult(
+            "accessibility",
+            "Interactive elements labeled",
+            "PASS" if unlabeled == 0 else "WARN",
+            f"{unlabeled} unlabeled elements" if unlabeled else "All elements labeled",
+        )
+    )
 
 
 def run_animation_checks(page, report: QAReport):
@@ -359,11 +440,16 @@ def run_animation_checks(page, report: QAReport):
         } catch(e) {}
         return found;
     }""")
-    report.add(CheckResult(
-        "animation", "prefers-reduced-motion respected",
-        "PASS" if has_reduced_motion else "WARN",
-        "Media query found" if has_reduced_motion else "No reduced-motion media query detected"
-    ))
+    report.add(
+        CheckResult(
+            "animation",
+            "prefers-reduced-motion respected",
+            "PASS" if has_reduced_motion else "WARN",
+            "Media query found"
+            if has_reduced_motion
+            else "No reduced-motion media query detected",
+        )
+    )
 
     # Check for animation/transition declarations
     has_animations = page.evaluate("""() => {
@@ -375,11 +461,14 @@ def run_animation_checks(page, report: QAReport):
         });
         return count;
     }""")
-    report.add(CheckResult(
-        "animation", "Animations present",
-        "PASS" if has_animations > 0 else "WARN",
-        f"{has_animations} animated elements found"
-    ))
+    report.add(
+        CheckResult(
+            "animation",
+            "Animations present",
+            "PASS" if has_animations > 0 else "WARN",
+            f"{has_animations} animated elements found",
+        )
+    )
 
 
 def generate_html_report(report: QAReport, output_path: str):
@@ -396,7 +485,9 @@ def generate_html_report(report: QAReport, output_path: str):
     for cat_name, checks in categories.items():
         rows = ""
         for c in checks:
-            status_color = {"PASS": "#22c55e", "FAIL": "#ef4444", "WARN": "#f59e0b"}[c.status]
+            status_color = {"PASS": "#22c55e", "FAIL": "#ef4444", "WARN": "#f59e0b"}[
+                c.status
+            ]
             rows += f"""
             <tr>
                 <td><span style="color:{status_color};font-weight:700">{c.status}</span></td>
@@ -447,9 +538,9 @@ def generate_html_report(report: QAReport, output_path: str):
         <p style="color:#666;margin-bottom:1rem">{report.target} &mdash; {report.timestamp}</p>
         <div style="display:flex;gap:1.5rem;align-items:center">
             <span style="font-size:2rem;font-weight:800;color:{verdict_color}">{report.verdict}</span>
-            <span style="color:#22c55e">{s['passed']} passed</span>
-            <span style="color:#ef4444">{s['failed']} failed</span>
-            <span style="color:#f59e0b">{s['warnings']} warnings</span>
+            <span style="color:#22c55e">{s["passed"]} passed</span>
+            <span style="color:#ef4444">{s["failed"]} failed</span>
+            <span style="color:#f59e0b">{s["warnings"]} warnings</span>
         </div>
     </header>
 
@@ -473,7 +564,9 @@ def main():
     parser = argparse.ArgumentParser(description="GrowthOS Sales Page QA")
     parser.add_argument("--target", required=True, help="Path to built HTML page")
     parser.add_argument("--state", default=None, help="Path to state.json")
-    parser.add_argument("--output", default="phase-8-qa.html", help="Path for HTML report output")
+    parser.add_argument(
+        "--output", default="phase-8-qa.html", help="Path for HTML report output"
+    )
     args = parser.parse_args()
 
     if not os.path.exists(args.target):
@@ -509,11 +602,13 @@ def main():
     generate_html_report(report, args.output)
 
     s = report.summary
-    print(f"\n{'='*50}")
+    print(f"\n{'=' * 50}")
     print(f"  VERDICT: {report.verdict}")
-    print(f"  Passed: {s['passed']} | Failed: {s['failed']} | Warnings: {s['warnings']}")
+    print(
+        f"  Passed: {s['passed']} | Failed: {s['failed']} | Warnings: {s['warnings']}"
+    )
     print(f"  Report: {args.output}")
-    print(f"{'='*50}\n")
+    print(f"{'=' * 50}\n")
 
     exit_codes = {"PASS": 0, "CONCERNS": 1, "FAIL": 2}
     sys.exit(exit_codes.get(report.verdict, 2))

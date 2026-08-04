@@ -14,8 +14,7 @@ Strategy:
 """
 
 import re
-import sys
-from collections import Counter, defaultdict
+from collections import Counter
 from datetime import datetime
 from pathlib import Path
 
@@ -47,7 +46,15 @@ def parse_entries(md_path: Path) -> list:
             "cid": m.group(3),
             "raw": block,
         }
-        for field in ["tema", "categoria", "template", "variant", "tag", "razão", "source"]:
+        for field in [
+            "tema",
+            "categoria",
+            "template",
+            "variant",
+            "tag",
+            "razão",
+            "source",
+        ]:
             fm = re.search(rf"-\s+\*\*{field}:\*\*\s+(.+)", block)
             if fm:
                 entry[field] = fm.group(1).strip("` ").strip()
@@ -107,30 +114,42 @@ def detect_lessons(stats: dict, rejected: list) -> list:
         if count >= 3:
             lessons.append(f"Tag `{tag}` rejeitada {count}x — **evitar sempre**.")
         elif count == 2:
-            lessons.append(f"Tag `{tag}` rejeitada 2x — **cuidado**, revisar antes de finalizar.")
+            lessons.append(
+                f"Tag `{tag}` rejeitada 2x — **cuidado**, revisar antes de finalizar."
+            )
 
     # If a revision tag appears 3+ times → recurring-issue rule
     for tag, count in stats["revision_tags"].most_common():
         if count >= 3:
-            lessons.append(f"Revisão `{tag}` pedida {count}x — **revisar preventivamente** antes de gerar.")
+            lessons.append(
+                f"Revisão `{tag}` pedida {count}x — **revisar preventivamente** antes de gerar."
+            )
         elif count == 2:
-            lessons.append(f"Revisão `{tag}` pedida 2x — padrão emergente, ficar atento.")
+            lessons.append(
+                f"Revisão `{tag}` pedida 2x — padrão emergente, ficar atento."
+            )
 
     # If a template has high approval rate and seen_count >= 5
     template_total = stats["approved_by_template"] + stats["rejected_by_template"]
     for template, approved_count in stats["approved_by_template"].most_common():
         total = template_total.get(template, approved_count)
         if total >= 5 and approved_count / total > 0.8:
-            lessons.append(f"Template `{template}` tem {int(approved_count/total*100)}% de aprovação ({approved_count}/{total}) — **preferir**.")
+            lessons.append(
+                f"Template `{template}` tem {int(approved_count / total * 100)}% de aprovação ({approved_count}/{total}) — **preferir**."
+            )
 
     # If a variant dominates approvals
     for variant, count in stats["approved_by_variant"].most_common(1):
         total = stats["total_approved"]
         if total >= 5 and count / total > 0.6:
-            lessons.append(f"Variant `{variant}` domina aprovações ({count}/{total}, {int(count/total*100)}%) — **default recomendado**.")
+            lessons.append(
+                f"Variant `{variant}` domina aprovações ({count}/{total}, {int(count / total * 100)}%) — **default recomendado**."
+            )
 
     if not lessons:
-        lessons.append("_(insuficiente data — continue aprovando/rejeitando pra lições aparecerem)_")
+        lessons.append(
+            "_(insuficiente data — continue aprovando/rejeitando pra lições aparecerem)_"
+        )
 
     return lessons
 
@@ -140,7 +159,7 @@ def render_profile(stats: dict, lessons: list) -> str:
     lines = [
         "# PROFILE — Perfil Agregado de Preferências",
         "",
-        f"> **Auto-gerado por:** `growthOS/scripts/update-profile.py`",
+        "> **Auto-gerado por:** `growthOS/scripts/update-profile.py`",
         "> **Lido por:** TODOS os agentes de conteúdo antes de gerar",
         "> **Propósito:** RLHF pessoal — agrega APPROVED + REVISIONS + REJECTED em insights acionáveis",
         f"> **Última atualização:** {now}",
@@ -166,33 +185,39 @@ def render_profile(stats: dict, lessons: list) -> str:
     if stats["total_approved"] == 0:
         lines.extend(["", "_(sem aprovações ainda)_"])
     else:
-        lines.extend([
-            "",
-            "### Por template",
-            "",
-            "| Template | Aprovações |",
-            "|---|---|",
-        ])
+        lines.extend(
+            [
+                "",
+                "### Por template",
+                "",
+                "| Template | Aprovações |",
+                "|---|---|",
+            ]
+        )
         for t, c in stats["approved_by_template"].most_common():
             lines.append(f"| `{t}` | {c} |")
 
-        lines.extend([
-            "",
-            "### Por variant",
-            "",
-            "| Variant | Aprovações |",
-            "|---|---|",
-        ])
+        lines.extend(
+            [
+                "",
+                "### Por variant",
+                "",
+                "| Variant | Aprovações |",
+                "|---|---|",
+            ]
+        )
         for v, c in stats["approved_by_variant"].most_common():
             lines.append(f"| `{v}` | {c} |")
 
-        lines.extend([
-            "",
-            "### Por categoria",
-            "",
-            "| Categoria | Aprovações |",
-            "|---|---|",
-        ])
+        lines.extend(
+            [
+                "",
+                "### Por categoria",
+                "",
+                "| Categoria | Aprovações |",
+                "|---|---|",
+            ]
+        )
         for cat, c in stats["approved_by_category"].most_common():
             lines.append(f"| `{cat}` | {c} |")
 
@@ -200,13 +225,15 @@ def render_profile(stats: dict, lessons: list) -> str:
     if stats["total_revisions"] == 0:
         lines.extend(["", "_(sem revisões ainda)_"])
     else:
-        lines.extend([
-            "",
-            "### Top revision tags",
-            "",
-            "| Tag | Contagem |",
-            "|---|---|",
-        ])
+        lines.extend(
+            [
+                "",
+                "### Top revision tags",
+                "",
+                "| Tag | Contagem |",
+                "|---|---|",
+            ]
+        )
         for tag, c in stats["revision_tags"].most_common():
             lines.append(f"| `{tag}` | {c} |")
 
@@ -214,24 +241,28 @@ def render_profile(stats: dict, lessons: list) -> str:
     if stats["total_rejected"] == 0:
         lines.extend(["", "_(sem rejeições ainda)_"])
     else:
-        lines.extend([
-            "",
-            "### Top rejection tags",
-            "",
-            "| Tag | Contagem |",
-            "|---|---|",
-        ])
+        lines.extend(
+            [
+                "",
+                "### Top rejection tags",
+                "",
+                "| Tag | Contagem |",
+                "|---|---|",
+            ]
+        )
         for tag, c in stats["rejected_tags"].most_common():
             lines.append(f"| `{tag}` | {c} |")
 
-    lines.extend([
-        "",
-        "---",
-        "",
-        "## Anti-padrões ativos",
-        "",
-    ])
-    anti = [l for l in lessons if "evitar" in l.lower()]
+    lines.extend(
+        [
+            "",
+            "---",
+            "",
+            "## Anti-padrões ativos",
+            "",
+        ]
+    )
+    anti = [lesson for lesson in lessons if "evitar" in lesson.lower()]
     if anti:
         for a in anti:
             lines.append(f"- {a}")
@@ -249,10 +280,16 @@ def main():
     lessons = detect_lessons(stats, rejected)
     profile_content = render_profile(stats, lessons)
     PROFILE.write_text(profile_content, encoding="utf-8")
-    print(f"✅ PROFILE.md updated")
-    print(f"   base: {stats['total_reviews']} reviews ({stats['total_approved']}a {stats['total_revisions']}v {stats['total_rejected']}r)")
-    print(f"   approval rate: {stats['approval_rate']:.1f}% · revision rate: {stats['revision_rate']:.1f}%")
-    print(f"   lessons: {len([l for l in lessons if not l.startswith('_')])}")
+    print("✅ PROFILE.md updated")
+    print(
+        f"   base: {stats['total_reviews']} reviews ({stats['total_approved']}a {stats['total_revisions']}v {stats['total_rejected']}r)"
+    )
+    print(
+        f"   approval rate: {stats['approval_rate']:.1f}% · revision rate: {stats['revision_rate']:.1f}%"
+    )
+    print(
+        f"   lessons: {len([lesson for lesson in lessons if not lesson.startswith('_')])}"
+    )
 
 
 if __name__ == "__main__":

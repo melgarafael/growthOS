@@ -17,10 +17,9 @@ Features:
 
 import os
 import json
-import sys
 from datetime import datetime
 from pathlib import Path
-from flask import Flask, jsonify, request, send_from_directory, render_template_string, abort, redirect
+from flask import Flask, jsonify, request, send_from_directory, abort, redirect
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 GROWTHOS = REPO_ROOT / "growthOS"
@@ -51,13 +50,19 @@ def list_projects() -> list:
         for d in sorted(OUTPUT.iterdir()):
             if d.is_dir() and (d / "state.json").exists():
                 state = json.loads((d / "state.json").read_text())
-                projects.append({
-                    "slug": d.name,
-                    "name": state.get("project", {}).get("name", d.name),
-                    "status": state.get("project", {}).get("status", "unknown"),
-                    "current_phase": state.get("project", {}).get("current_phase", "discovery"),
-                    "phases_completed": state.get("metadata", {}).get("total_phases_completed", 0),
-                })
+                projects.append(
+                    {
+                        "slug": d.name,
+                        "name": state.get("project", {}).get("name", d.name),
+                        "status": state.get("project", {}).get("status", "unknown"),
+                        "current_phase": state.get("project", {}).get(
+                            "current_phase", "discovery"
+                        ),
+                        "phases_completed": state.get("metadata", {}).get(
+                            "total_phases_completed", 0
+                        ),
+                    }
+                )
     return projects
 
 
@@ -78,6 +83,7 @@ def save_state(slug: str, state: dict) -> None:
 # ─────────────────────────────────────────────────────────────────
 # Routes
 # ─────────────────────────────────────────────────────────────────
+
 
 @app.route("/")
 def index():
@@ -131,20 +137,26 @@ def index():
         for p in projects:
             status_class = "active" if p["status"] == "in-progress" else p["status"]
             phase_dots = ""
-            phase_idx = next((i for i, ph in enumerate(PHASES) if ph["id"] == p["current_phase"]), 0)
+            phase_idx = next(
+                (i for i, ph in enumerate(PHASES) if ph["id"] == p["current_phase"]), 0
+            )
             for i in range(8):
-                cls = "done" if i < p["phases_completed"] else ("active" if i == phase_idx else "")
+                cls = (
+                    "done"
+                    if i < p["phases_completed"]
+                    else ("active" if i == phase_idx else "")
+                )
                 phase_dots += f'<div class="phase-dot {cls}"></div>'
 
             html += f"""
             <div class="project-card">
               <div>
-                <a href="/project/{p['slug']}">{p['name']}</a>
+                <a href="/project/{p["slug"]}">{p["name"]}</a>
                 <div class="phases-bar">{phase_dots}</div>
               </div>
               <div class="project-meta">
-                <span class="badge badge-{status_class}">{p['status']}</span>
-                <br>Phase {p['phases_completed']}/8
+                <span class="badge badge-{status_class}">{p["status"]}</span>
+                <br>Phase {p["phases_completed"]}/8
               </div>
             </div>
             """
@@ -165,14 +177,16 @@ def project_overview(slug):
 
     project = state.get("project", {})
     current_phase = project.get("current_phase", "discovery")
-    current_idx = next((i for i, ph in enumerate(PHASES) if ph["id"] == current_phase), 0)
+    current_idx = next(
+        (i for i, ph in enumerate(PHASES) if ph["id"] == current_phase), 0
+    )
 
     html = f"""
     <!DOCTYPE html>
     <html lang="en">
     <head>
       <meta charset="utf-8">
-      <title>{project.get('name', slug)} — Sales Page Studio</title>
+      <title>{project.get("name", slug)} — Sales Page Studio</title>
       <style>
         * {{ box-sizing: border-box; margin: 0; padding: 0; }}
         body {{ background: #09090B; color: #FAFAFA; font-family: system-ui, -apple-system, sans-serif; }}
@@ -218,7 +232,7 @@ def project_overview(slug):
     <body>
       <div class="container">
         <div class="header">
-          <h1>{project.get('name', slug)}</h1>
+          <h1>{project.get("name", slug)}</h1>
           <a href="/">← All Projects</a>
         </div>
 
@@ -237,11 +251,11 @@ def project_overview(slug):
             cls = "active"
 
         html += f"""
-          <a href="/project/{slug}/phase/{phase['num']}" style="text-decoration:none;color:inherit;flex:1;min-width:120px;">
+          <a href="/project/{slug}/phase/{phase["num"]}" style="text-decoration:none;color:inherit;flex:1;min-width:120px;">
             <div class="phase-card {cls}">
-              <div class="phase-icon">{phase['icon']}</div>
-              <div class="phase-label">{phase['label']}</div>
-              <div class="phase-num">Phase {phase['num']}</div>
+              <div class="phase-icon">{phase["icon"]}</div>
+              <div class="phase-label">{phase["label"]}</div>
+              <div class="phase-num">Phase {phase["num"]}</div>
             </div>
           </a>
         """
@@ -251,7 +265,12 @@ def project_overview(slug):
     """
 
     # Show current phase preview
-    preview_file = OUTPUT / slug / "previews" / f"phase-{current_idx + 1}-{PHASES[current_idx]['id']}.html"
+    preview_file = (
+        OUTPUT
+        / slug
+        / "previews"
+        / f"phase-{current_idx + 1}-{PHASES[current_idx]['id']}.html"
+    )
     if preview_file.exists():
         html += f'<iframe class="preview-frame" src="/project/{slug}/preview/{current_idx + 1}"></iframe>'
     else:
@@ -323,6 +342,7 @@ def serve_build(slug):
 # API Routes
 # ─────────────────────────────────────────────────────────────────
 
+
 @app.route("/api/projects")
 def api_list_projects():
     return jsonify(list_projects())
@@ -384,12 +404,13 @@ def api_revise_phase(slug):
         state[phase_key]["status"] = "revision-requested"
         if "revision_notes" not in state[phase_key]:
             state[phase_key]["revision_notes"] = []
-        state[phase_key]["revision_notes"].append({
-            "note": note,
-            "timestamp": datetime.now().isoformat()
-        })
+        state[phase_key]["revision_notes"].append(
+            {"note": note, "timestamp": datetime.now().isoformat()}
+        )
 
-    state["metadata"]["total_revisions"] = state.get("metadata", {}).get("total_revisions", 0) + 1
+    state["metadata"]["total_revisions"] = (
+        state.get("metadata", {}).get("total_revisions", 0) + 1
+    )
     save_state(slug, state)
     return jsonify({"ok": True})
 
@@ -407,15 +428,15 @@ def api_init_project(slug):
             "created": datetime.now().isoformat(),
             "updated": datetime.now().isoformat(),
             "current_phase": "discovery",
-            "status": "in-progress"
+            "status": "in-progress",
         },
         "metadata": {
             "total_phases_completed": 0,
             "total_revisions": 0,
             "design_intelligence_files_consulted": [],
             "skills_invoked": [],
-            "build_duration_minutes": None
-        }
+            "build_duration_minutes": None,
+        },
     }
 
     # Create directories
@@ -429,6 +450,7 @@ def api_init_project(slug):
 # ─────────────────────────────────────────────────────────────────
 # Static assets
 # ─────────────────────────────────────────────────────────────────
+
 
 @app.route("/assets/<path:filename>")
 def serve_asset(filename):

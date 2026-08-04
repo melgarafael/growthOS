@@ -321,6 +321,25 @@ attention). Decoration-only animations are excluded.
     transition-duration: var(--mi-duration-fast);
   }
 
+  /* --- TEXT ROLL (label swaps vertically on hover) --- */
+  .btn-roll {
+    display: inline-flex;
+    flex-direction: column;
+    overflow: hidden;
+    height: 1.3em;
+    vertical-align: bottom;
+  }
+
+  .btn-roll span {
+    display: block;
+    line-height: 1.3em;
+    transition: transform var(--mi-duration-slow) var(--mi-easing-spring);
+  }
+
+  .btn:hover .btn-roll span {
+    transform: translateY(-100%);
+  }
+
   /* All buttons: focus-visible ring */
   .btn:focus-visible {
     outline: var(--mi-focus-ring-width) solid var(--mi-focus-ring-color);
@@ -799,6 +818,10 @@ attention). Decoration-only animations are excluded.
       <button class="btn btn-scale">Scale</button>
       <span class="demo-label">Bounce scale</span>
     </div>
+    <div class="demo-col">
+      <button class="btn btn-lift"><span class="btn-roll"><span>Text Roll</span><span aria-hidden="true">Text Roll</span></span></button>
+      <span class="demo-label">Vertical label swap</span>
+    </div>
   </div>
   <div class="demo-row">
     <div class="demo-col">
@@ -924,6 +947,26 @@ attention). Decoration-only animations are excluded.
 ---
 
 ## Variants
+
+### Text Roll — Markup
+
+`.btn-roll` requires the label duplicated inside two stacked spans; the wrapper clips to one
+line height and the hover rule (`.btn:hover .btn-roll span { transform: translateY(-100%) }`)
+slides both up together, revealing the duplicate as if the text "rolled" over.
+
+```html
+<a class="btn btn-lift" href="#cta">
+  <span class="btn-roll">
+    <span>Book a call</span>
+    <span aria-hidden="true">Book a call</span>
+  </span>
+</a>
+```
+
+- The second span is `aria-hidden` — screen readers only see the label once.
+- Works on any element with `.btn` (or any parent that gets `:hover`) — not limited to `<button>`.
+- Combine with `.btn-lift` or a solid background for best legibility; avoid on `.btn-fill` (both animate on hover and compete for attention).
+- Respects the global `prefers-reduced-motion` override at the top of this file (animation/transition duration collapses to ~0).
 
 ### Custom Theme Override
 

@@ -251,7 +251,9 @@ class TestAutonomyValidation:
 
 
 class TestEnvVarOverride:
-    def test_env_var_path(self, valid_yaml_file: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    def test_env_var_path(
+        self, valid_yaml_file: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
         monkeypatch.setenv("GROWTHOS_BRAND_VOICE_PATH", str(valid_yaml_file))
         config = load_brand_voice()
         assert config.brand.name == "TestBrand"

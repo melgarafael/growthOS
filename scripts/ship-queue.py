@@ -51,10 +51,22 @@ def save_queue(q: dict):
 
 def slugify(s: str) -> str:
     import re
+
     s = s.lower()
-    for a, b in [("á", "a"), ("à", "a"), ("ã", "a"), ("â", "a"),
-                 ("é", "e"), ("ê", "e"), ("í", "i"), ("ó", "o"),
-                 ("ô", "o"), ("õ", "o"), ("ú", "u"), ("ç", "c")]:
+    for a, b in [
+        ("á", "a"),
+        ("à", "a"),
+        ("ã", "a"),
+        ("â", "a"),
+        ("é", "e"),
+        ("ê", "e"),
+        ("í", "i"),
+        ("ó", "o"),
+        ("ô", "o"),
+        ("õ", "o"),
+        ("ú", "u"),
+        ("ç", "c"),
+    ]:
         s = s.replace(a, b)
     s = re.sub(r"[^a-z0-9]+", "-", s).strip("-")
     return s[:40] or "untitled"
@@ -89,8 +101,16 @@ def ensure_export(item: dict, idx: int, queue: dict) -> Path | None:
     src_html = DESIGN_SYSTEM / source
 
     # Run export (Python playwright — no npm install needed)
-    export_cmd = [str(VENV_PY), str(SCRIPTS / "export_carousel.py"), str(src_html), "--carousel", cid]
-    res = subprocess.run(export_cmd, cwd=REPO_ROOT, capture_output=True, text=True, timeout=300)
+    export_cmd = [
+        str(VENV_PY),
+        str(SCRIPTS / "export_carousel.py"),
+        str(src_html),
+        "--carousel",
+        cid,
+    ]
+    res = subprocess.run(
+        export_cmd, cwd=REPO_ROOT, capture_output=True, text=True, timeout=300
+    )
     if res.returncode != 0:
         print(f"  ❌ export failed: {res.stderr[-300:]}")
         update_status(queue, idx, "failed", error="export failed")
@@ -100,10 +120,18 @@ def ensure_export(item: dict, idx: int, queue: dict) -> Path | None:
     update_status(queue, idx, "organizing")
     print(f"  📂 organizing {cid}...")
     org_cmd = [
-        str(VENV_PY), str(SCRIPTS / "organize-approved.py"),
-        "--carousel", cid, "--source", stem, "--date", today,
+        str(VENV_PY),
+        str(SCRIPTS / "organize-approved.py"),
+        "--carousel",
+        cid,
+        "--source",
+        stem,
+        "--date",
+        today,
     ]
-    res = subprocess.run(org_cmd, cwd=REPO_ROOT, capture_output=True, text=True, timeout=120)
+    res = subprocess.run(
+        org_cmd, cwd=REPO_ROOT, capture_output=True, text=True, timeout=120
+    )
     if res.returncode != 0:
         print(f"  ❌ organize failed: {res.stderr[-300:]}")
         update_status(queue, idx, "failed", error="organize failed")
@@ -127,7 +155,7 @@ def ensure_caption(folder: Path, queue: dict, idx: int) -> bool:
             return True
 
     update_status(queue, idx, "captioning")
-    print(f"  ✏ generating caption...")
+    print("  ✏ generating caption...")
 
     cmd = [str(VENV_PY), str(SCRIPTS / "generate_caption.py"), "--folder", str(folder)]
     res = subprocess.run(cmd, cwd=REPO_ROOT, capture_output=True, text=True, timeout=60)
@@ -162,7 +190,12 @@ def publish(folder: Path, queue: dict, idx: int, dry_run: bool) -> bool:
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--dry-run", action="store_true")
-    parser.add_argument("--delay", type=int, default=900, help="seconds between posts (default 900 = 15 min)")
+    parser.add_argument(
+        "--delay",
+        type=int,
+        default=900,
+        help="seconds between posts (default 900 = 15 min)",
+    )
     parser.add_argument("--max", type=int, default=10, help="max items per run")
     parser.add_argument("--item", type=int, help="publish only 1 item (0-based idx)")
     args = parser.parse_args()
@@ -177,7 +210,11 @@ def main():
     if args.item is not None:
         indices = [args.item] if 0 <= args.item < len(items) else []
     else:
-        indices = [i for i, it in enumerate(items) if it.get("status") not in {"done", "skipped"}][:args.max]
+        indices = [
+            i
+            for i, it in enumerate(items)
+            if it.get("status") not in {"done", "skipped"}
+        ][: args.max]
 
     if not indices:
         print("✅ nothing pending in queue")
@@ -219,7 +256,9 @@ def main():
     # Final report
     done = sum(1 for it in items if it.get("status") == "done")
     failed = sum(1 for it in items if it.get("status") == "failed")
-    print(f"\n✅ ship complete: {done} done, {failed} failed, {len(items) - done - failed} remaining")
+    print(
+        f"\n✅ ship complete: {done} done, {failed} failed, {len(items) - done - failed} remaining"
+    )
 
 
 if __name__ == "__main__":

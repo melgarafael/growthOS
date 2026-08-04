@@ -27,7 +27,6 @@ import argparse
 import json
 import re
 import subprocess
-import sys
 from datetime import datetime
 from pathlib import Path
 
@@ -62,7 +61,11 @@ def next_rev_number(base_stem: str) -> int:
     existing = sorted(DESIGN_SYSTEM.glob(f"{base_stem}-rev*.html"))
     if not existing:
         return 1
-    nums = [int(re.search(r"rev(\d+)", f.name).group(1)) for f in existing if re.search(r"rev(\d+)", f.name)]
+    nums = [
+        int(re.search(r"rev(\d+)", f.name).group(1))
+        for f in existing
+        if re.search(r"rev(\d+)", f.name)
+    ]
     return (max(nums) + 1) if nums else 1
 
 
@@ -75,9 +78,13 @@ def build_master_brief(file: str, revisions: list, reviews: dict) -> Path:
 
     # Figure out which carousels are approved, which are revised, which are rejected
     file_reviews = reviews.get(file, {})
-    approved_cids = sorted([cid for cid, r in file_reviews.items() if r.get("status") == "approved"])
+    approved_cids = sorted(
+        [cid for cid, r in file_reviews.items() if r.get("status") == "approved"]
+    )
     revised_cids = sorted([r["cid"] for r in revisions])
-    rejected_cids = sorted([cid for cid, r in file_reviews.items() if r.get("status") == "rejected"])
+    rejected_cids = sorted(
+        [cid for cid, r in file_reviews.items() if r.get("status") == "rejected"]
+    )
 
     ts = datetime.now().strftime("%Y%m%d-%H%M%S")
     brief_name = f"MASTER-REVISION-{base_stem}-rev{rev_n}-{ts}.md"
@@ -86,8 +93,8 @@ def build_master_brief(file: str, revisions: list, reviews: dict) -> Path:
     lines = [
         f"# MASTER REVISION BRIEF — {base_stem} → {output_file}",
         "",
-        f"> **Para:** UiUX Expert (via Maestri)",
-        f"> **De:** /grow revise (process-revision.py)",
+        "> **Para:** UiUX Expert (via Maestri)",
+        "> **De:** /grow revise (process-revision.py)",
         f"> **Data:** {ts}",
         f"> **Fonte original:** `growthOS/design-system/{file}`",
         f"> **Output:** `growthOS/design-system/{output_file}`",
@@ -140,29 +147,33 @@ def build_master_brief(file: str, revisions: list, reviews: dict) -> Path:
         slides = rev.get("affected_slides", [])
         instructions = rev.get("instructions", "")
         brief_path_rel = rev.get("brief_path", "")
-        lines.extend([
-            f"### {cid}",
-            "",
-            f"- **tags:** {tags}",
-            f"- **slides afetados:** {slides}",
-            f"- **brief individual:** `{brief_path_rel}`",
-            "",
-            f"**Instruções do Rafael (literal):**",
-            "",
-            f"> {instructions}",
-            "",
-        ])
+        lines.extend(
+            [
+                f"### {cid}",
+                "",
+                f"- **tags:** {tags}",
+                f"- **slides afetados:** {slides}",
+                f"- **brief individual:** `{brief_path_rel}`",
+                "",
+                "**Instruções do Rafael (literal):**",
+                "",
+                f"> {instructions}",
+                "",
+            ]
+        )
 
-    lines.extend([
-        "---",
-        "",
-        "## Quando terminar, responda com",
-        "",
-        f"1. Path do arquivo gerado: `growthOS/design-system/{output_file}`",
-        f"2. Contagem final de carrosséis no arquivo (esperado: {len(approved_cids) + len(revised_cids)})",
-        "3. Quais cids você manteve intactos vs regenerou",
-        "4. Qualquer decisão criativa que tomou (especialmente nos slides revisados)",
-    ])
+    lines.extend(
+        [
+            "---",
+            "",
+            "## Quando terminar, responda com",
+            "",
+            f"1. Path do arquivo gerado: `growthOS/design-system/{output_file}`",
+            f"2. Contagem final de carrosséis no arquivo (esperado: {len(approved_cids) + len(revised_cids)})",
+            "3. Quais cids você manteve intactos vs regenerou",
+            "4. Qualquer decisão criativa que tomou (especialmente nos slides revisados)",
+        ]
+    )
 
     brief_path.write_text("\n".join(lines), encoding="utf-8")
     return brief_path, output_path, rev_n
@@ -176,12 +187,14 @@ def dispatch_to_maestri(brief_path: Path, output_path: Path):
         f"Siga todas as leituras obrigatórias listadas no brief. Mantenha DS canônico. "
         f"Quando terminar: path + contagem de carrosséis + decisões criativas."
     )
-    print(f"\n📤 dispatching to UiUX Expert via maestri...")
+    print("\n📤 dispatching to UiUX Expert via maestri...")
     print(f"   brief: {brief_path.name}")
     try:
         result = subprocess.run(
             ["maestri", "ask", "UiUX Expert", prompt],
-            capture_output=True, text=True, timeout=30,
+            capture_output=True,
+            text=True,
+            timeout=30,
         )
         print(result.stdout[-500:] if result.stdout else "(no stdout)")
         if result.returncode != 0:
@@ -203,7 +216,7 @@ def append_revisions_md(file: str, rev_n: int, output_path: Path, revisions: lis
     footer += f"- **source:** `{file}`\n"
     footer += f"- **output:** `{rel_output}`\n"
     footer += f"- **cids revised:** {', '.join(r['cid'] for r in revisions)}\n"
-    footer += f"- **status:** dispatched (pending UiUX Expert completion)\n"
+    footer += "- **status:** dispatched (pending UiUX Expert completion)\n"
     REVISIONS_MD.write_text(content + footer)
 
 
@@ -211,7 +224,9 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--cid", help="process only this carousel id")
     parser.add_argument("--file", help="process only revisions for this source file")
-    parser.add_argument("--dry-run", action="store_true", help="show what would happen, don't dispatch")
+    parser.add_argument(
+        "--dry-run", action="store_true", help="show what would happen, don't dispatch"
+    )
     args = parser.parse_args()
 
     queue = load_queue()
@@ -231,7 +246,7 @@ def main():
         filtered = [r for r in filtered if r["file"] == args.file]
 
     if not filtered:
-        print(f"📭 no pending revisions match filters")
+        print("📭 no pending revisions match filters")
         return
 
     # Group by source file
@@ -239,7 +254,9 @@ def main():
     for rev in filtered:
         by_file.setdefault(rev["file"], []).append(rev)
 
-    print(f"📋 processing {len(filtered)} revision(s) across {len(by_file)} source file(s)")
+    print(
+        f"📋 processing {len(filtered)} revision(s) across {len(by_file)} source file(s)"
+    )
 
     for source_file, revs in by_file.items():
         print(f"\n━━ {source_file} ━━")
@@ -250,7 +267,7 @@ def main():
         print(f"   ✅ output target: {output_path.relative_to(REPO_ROOT)} (rev{rev_n})")
 
         if args.dry_run:
-            print(f"   [DRY RUN] would dispatch to UiUX Expert now")
+            print("   [DRY RUN] would dispatch to UiUX Expert now")
             continue
 
         dispatch_to_maestri(brief_path, output_path)
@@ -266,9 +283,11 @@ def main():
 
     if not args.dry_run:
         save_queue(queue)
-        print(f"\n✅ queue updated — {len(queue['pending'])} still pending, {len(queue['processing'])} processing")
-        print(f"\n   monitor with: maestri check 'UiUX Expert'")
-        print(f"   when done, open: http://localhost:5050 to re-review the revN file")
+        print(
+            f"\n✅ queue updated — {len(queue['pending'])} still pending, {len(queue['processing'])} processing"
+        )
+        print("\n   monitor with: maestri check 'UiUX Expert'")
+        print("   when done, open: http://localhost:5050 to re-review the revN file")
 
 
 if __name__ == "__main__":

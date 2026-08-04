@@ -31,17 +31,26 @@ POLL_INTERVAL = 5
 def is_logged_in(page) -> bool:
     """Heuristic: logged in if we're on / (not /accounts/login) AND Criar link is visible."""
     url = page.url.lower()
-    if "accounts/login" in url or "/login" in url or "challenge" in url or "two_factor" in url:
+    if (
+        "accounts/login" in url
+        or "/login" in url
+        or "challenge" in url
+        or "two_factor" in url
+    ):
         return False
     # Try to find Criar button in sidebar
     try:
-        page.get_by_text(re.compile(r"^Criar$|^Create$", re.I)).first.wait_for(timeout=2000)
+        page.get_by_text(re.compile(r"^Criar$|^Create$", re.I)).first.wait_for(
+            timeout=2000
+        )
         return True
     except PwTimeout:
         pass
     # Fallback: look for profile picture or home feed
     try:
-        page.locator('svg[aria-label*="Página inicial" i], svg[aria-label*="Home" i]').first.wait_for(timeout=2000)
+        page.locator(
+            'svg[aria-label*="Página inicial" i], svg[aria-label*="Home" i]'
+        ).first.wait_for(timeout=2000)
         return True
     except PwTimeout:
         return False
@@ -98,18 +107,22 @@ def main():
             if elapsed - last_print >= 30:
                 mins_left = remaining // 60
                 secs_left = remaining % 60
-                print(f"     ⏱  {elapsed // 60}min{elapsed % 60:02d}s elapsed — {mins_left}min{secs_left:02d}s restante")
+                print(
+                    f"     ⏱  {elapsed // 60}min{elapsed % 60:02d}s elapsed — {mins_left}min{secs_left:02d}s restante"
+                )
                 last_print = elapsed
 
             try:
                 if is_logged_in(page):
-                    print(f"\n  ✅ LOGADO! detectei o feed / sidebar Criar")
+                    print("\n  ✅ LOGADO! detectei o feed / sidebar Criar")
                     print(f"     tempo total: {elapsed}s")
                     print(f"     sessão persistida em: {PROFILE_DIR}")
-                    print(f"\n  ⏳ aguardando 8s pra salvar cookies completamente...")
+                    print("\n  ⏳ aguardando 8s pra salvar cookies completamente...")
                     time.sleep(8)
                     ctx.close()
-                    print("  ✅ browser fechado. próximas execuções podem rodar headless.\n")
+                    print(
+                        "  ✅ browser fechado. próximas execuções podem rodar headless.\n"
+                    )
                     return
             except Exception as e:
                 print(f"     check error: {e}")
@@ -117,7 +130,9 @@ def main():
             time.sleep(POLL_INTERVAL)
 
         print(f"\n  ❌ timeout — não detectei login em {MAX_WAIT_SECONDS}s")
-        print("     você pode rodar de novo quando quiser: .venv/bin/python publisher/manual_login.py")
+        print(
+            "     você pode rodar de novo quando quiser: .venv/bin/python publisher/manual_login.py"
+        )
         ctx.close()
         sys.exit(1)
 

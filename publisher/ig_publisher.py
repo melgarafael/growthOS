@@ -47,7 +47,7 @@ from datetime import datetime
 from pathlib import Path
 
 try:
-    from playwright.sync_api import sync_playwright, TimeoutError as PwTimeout, expect
+    from playwright.sync_api import sync_playwright, TimeoutError as PwTimeout
 except ImportError:
     print("❌ playwright not installed")
     print("   run: pip install playwright && playwright install chromium")
@@ -104,7 +104,9 @@ class InstagramPublisher:
             timezone_id="America/Sao_Paulo",
             args=["--disable-blink-features=AutomationControlled"],
         )
-        self.page = self.context.pages[0] if self.context.pages else self.context.new_page()
+        self.page = (
+            self.context.pages[0] if self.context.pages else self.context.new_page()
+        )
 
     def close(self):
         if self.context:
@@ -127,10 +129,17 @@ class InstagramPublisher:
 
         current_url = self.page.url.lower()
         # Definitive logged-out signals
-        if "accounts/login" in current_url or "/login/" in current_url or current_url.endswith("/login"):
+        if (
+            "accounts/login" in current_url
+            or "/login/" in current_url
+            or current_url.endswith("/login")
+        ):
             return False
         # Definitive logged-in signals via URL alone
-        if any(k in current_url for k in ["instagram.com/?", "instagram.com/#", "instagram.com/"]):
+        if any(
+            k in current_url
+            for k in ["instagram.com/?", "instagram.com/#", "instagram.com/"]
+        ):
             # Double check by looking for the login form — if present, we're NOT logged in
             try:
                 login_input = self.page.locator('input[name="username"]').first
@@ -140,7 +149,6 @@ class InstagramPublisher:
                 pass
             return True
         return False
-
 
     def ensure_logged_in(self):
         if self.is_logged_in():
@@ -185,7 +193,9 @@ class InstagramPublisher:
                 loc = self.page.locator(sel).first
                 if loc.count() > 0:
                     # Click its interactive parent (usually div[role=link] or a)
-                    loc.locator("xpath=ancestor::*[self::a or @role='link' or @role='button'][1]").first.click(timeout=5000)
+                    loc.locator(
+                        "xpath=ancestor::*[self::a or @role='link' or @role='button'][1]"
+                    ).first.click(timeout=5000)
                     clicked = True
                     print(f"   clicked via {sel}")
                     break
@@ -196,7 +206,9 @@ class InstagramPublisher:
         if not clicked:
             for role in ["link", "button"]:
                 try:
-                    self.page.get_by_role(role, name=re.compile(r"Criar|Create", re.I)).first.click(timeout=5000, force=True)
+                    self.page.get_by_role(
+                        role, name=re.compile(r"Criar|Create", re.I)
+                    ).first.click(timeout=5000, force=True)
                     clicked = True
                     print(f"   clicked via role={role}")
                     break
@@ -206,7 +218,9 @@ class InstagramPublisher:
         # Strategy 3: force-click the text span
         if not clicked:
             try:
-                self.page.get_by_text(re.compile(r"^Criar$|^Create$", re.I)).first.click(timeout=5000, force=True)
+                self.page.get_by_text(
+                    re.compile(r"^Criar$|^Create$", re.I)
+                ).first.click(timeout=5000, force=True)
                 clicked = True
                 print("   clicked via text (force)")
             except Exception:
@@ -235,10 +249,36 @@ class InstagramPublisher:
         print("   dropdown detected, clicking Postar...")
         post_clicked = False
         for strategy_name, strategy in [
-            ("menuitem-role", lambda: self.page.get_by_role("menuitem", name=re.compile(r"^\s*Postar\s*$|^\s*Post\s*$", re.I)).click(timeout=5000)),
-            ("button-role", lambda: self.page.get_by_role("button", name=re.compile(r"^\s*Postar\s*$|^\s*Post\s*$", re.I)).click(timeout=5000)),
-            ("text-force", lambda: self.page.get_by_text(re.compile(r"^\s*Postar\s*$|^\s*Post\s*$", re.I)).first.click(timeout=5000, force=True)),
-            ("svg-parent", lambda: self.page.locator('svg[aria-label*="Postar" i], svg[aria-label*="Post" i]').first.locator("xpath=ancestor::*[@role='menuitem' or @role='button' or self::a][1]").click(timeout=5000)),
+            (
+                "menuitem-role",
+                lambda: self.page.get_by_role(
+                    "menuitem", name=re.compile(r"^\s*Postar\s*$|^\s*Post\s*$", re.I)
+                ).click(timeout=5000),
+            ),
+            (
+                "button-role",
+                lambda: self.page.get_by_role(
+                    "button", name=re.compile(r"^\s*Postar\s*$|^\s*Post\s*$", re.I)
+                ).click(timeout=5000),
+            ),
+            (
+                "text-force",
+                lambda: self.page.get_by_text(
+                    re.compile(r"^\s*Postar\s*$|^\s*Post\s*$", re.I)
+                ).first.click(timeout=5000, force=True),
+            ),
+            (
+                "svg-parent",
+                lambda: (
+                    self.page.locator(
+                        'svg[aria-label*="Postar" i], svg[aria-label*="Post" i]'
+                    )
+                    .first.locator(
+                        "xpath=ancestor::*[@role='menuitem' or @role='button' or self::a][1]"
+                    )
+                    .click(timeout=5000)
+                ),
+            ),
         ]:
             try:
                 strategy()
@@ -255,7 +295,9 @@ class InstagramPublisher:
                 print("   upload modal ready (late detection)")
                 return
             except PwTimeout:
-                raise RuntimeError("couldn't click Postar in dropdown and no upload modal appeared")
+                raise RuntimeError(
+                    "couldn't click Postar in dropdown and no upload modal appeared"
+                )
 
         human_delay(2, 3)
         # Wait for the upload modal after clicking Postar
@@ -275,11 +317,15 @@ class InstagramPublisher:
     def click_avancar(self, times: int = 2):
         """Click 'Avançar' N times (crop + filter)."""
         for i in range(times):
-            print(f"   clicking Avançar ({i+1}/{times})")
+            print(f"   clicking Avançar ({i + 1}/{times})")
             try:
-                self.page.get_by_role("button", name=re.compile(r"^Avançar$|^Next$", re.I)).click(timeout=10000)
+                self.page.get_by_role(
+                    "button", name=re.compile(r"^Avançar$|^Next$", re.I)
+                ).click(timeout=10000)
             except PwTimeout:
-                self.page.get_by_text(re.compile(r"^Avançar$|^Next$", re.I)).first.click()
+                self.page.get_by_text(
+                    re.compile(r"^Avançar$|^Next$", re.I)
+                ).first.click()
             human_delay(1.5, 2.5)
 
     def fill_caption(self, caption: str):
@@ -287,13 +333,15 @@ class InstagramPublisher:
         print(f"✏ filling caption ({len(caption)} chars)...")
         # IG caption field is a contenteditable / textarea with aria-label "Escreva uma legenda..."
         try:
-            field = self.page.get_by_label(re.compile("Escreva uma legenda|Write a caption", re.I))
+            field = self.page.get_by_label(
+                re.compile("Escreva uma legenda|Write a caption", re.I)
+            )
             field.click()
             human_delay(0.5, 1)
             field.fill(caption)
         except Exception:
             # Fallback to textarea query
-            textarea = self.page.locator('textarea').first
+            textarea = self.page.locator("textarea").first
             textarea.click()
             human_delay(0.3, 0.7)
             textarea.fill(caption)
@@ -306,16 +354,21 @@ class InstagramPublisher:
             schedule_iso: ISO datetime string (e.g., "2026-04-10T14:00:00")
         """
         from datetime import datetime as dt
+
         target = dt.fromisoformat(schedule_iso.replace("Z", "+00:00"))
         print(f"🕐 setting schedule: {target.strftime('%d/%m/%Y %H:%M')}...")
 
         # Click "Configurações avançadas" / "Advanced settings"
         try:
-            self.page.get_by_text(re.compile(r"Configurações avançadas|Advanced settings", re.I)).first.click(timeout=5000)
+            self.page.get_by_text(
+                re.compile(r"Configurações avançadas|Advanced settings", re.I)
+            ).first.click(timeout=5000)
         except (PwTimeout, Exception):
             # Try the collapsed toggle
             try:
-                self.page.locator('text=/Configurações avançadas|Advanced settings/i').first.click(timeout=5000)
+                self.page.locator(
+                    "text=/Configurações avançadas|Advanced settings/i"
+                ).first.click(timeout=5000)
             except Exception:
                 print("   ⚠ couldn't find Configurações avançadas — skipping schedule")
                 return False
@@ -323,12 +376,16 @@ class InstagramPublisher:
 
         # Toggle "Agendar" / "Schedule" switch
         try:
-            sched_toggle = self.page.get_by_text(re.compile(r"^Agendar$|^Schedule this post$|^Schedule$", re.I)).first
+            sched_toggle = self.page.get_by_text(
+                re.compile(r"^Agendar$|^Schedule this post$|^Schedule$", re.I)
+            ).first
             sched_toggle.click(timeout=5000)
         except (PwTimeout, Exception):
             # Try role-based
             try:
-                self.page.get_by_role("switch", name=re.compile(r"Agendar|Schedule", re.I)).click(timeout=5000)
+                self.page.get_by_role(
+                    "switch", name=re.compile(r"Agendar|Schedule", re.I)
+                ).click(timeout=5000)
             except Exception:
                 print("   ⚠ couldn't toggle schedule switch — skipping")
                 return False
@@ -338,8 +395,12 @@ class InstagramPublisher:
         # Instagram shows date picker and time picker — use keyboard input
         try:
             # Look for date/time inputs
-            date_input = self.page.locator('input[type="date"], input[placeholder*="data" i], input[placeholder*="date" i]').first
-            time_input = self.page.locator('input[type="time"], input[placeholder*="hora" i], input[placeholder*="time" i]').first
+            date_input = self.page.locator(
+                'input[type="date"], input[placeholder*="data" i], input[placeholder*="date" i]'
+            ).first
+            time_input = self.page.locator(
+                'input[type="time"], input[placeholder*="hora" i], input[placeholder*="time" i]'
+            ).first
 
             if date_input.count() > 0:
                 date_input.fill(target.strftime("%Y-%m-%d"))
@@ -386,17 +447,22 @@ class InstagramPublisher:
         print("🚀 clicking Compartilhar...")
         # If scheduled, button text changes to "Agendar" / "Schedule"
         try:
-            btn = self.page.get_by_role("button", name=re.compile(r"^Compartilhar$|^Share$|^Agendar$|^Schedule$", re.I))
+            btn = self.page.get_by_role(
+                "button",
+                name=re.compile(r"^Compartilhar$|^Share$|^Agendar$|^Schedule$", re.I),
+            )
             btn.click(timeout=10000)
         except PwTimeout:
-            self.page.get_by_text(re.compile(r"^Compartilhar$|^Share$|^Agendar$|^Schedule$", re.I)).first.click()
+            self.page.get_by_text(
+                re.compile(r"^Compartilhar$|^Share$|^Agendar$|^Schedule$", re.I)
+            ).first.click()
 
         # Wait for success toast or profile redirect
         print("   waiting for confirmation...")
         try:
             # Instagram shows "Sua publicação foi compartilhada" / "Your post has been shared"
             self.page.wait_for_selector(
-                'text=/Publicação compartilhada|Sua publicação|post has been shared|Post shared/',
+                "text=/Publicação compartilhada|Sua publicação|post has been shared|Post shared/",
                 timeout=60000,
             )
             print("✅ post shared successfully!")
@@ -423,7 +489,11 @@ class InstagramPublisher:
             print(f"⚠ Instagram max 10 slides, truncating from {len(slides)}")
             slides = slides[:10]
 
-        mode_label = "DRY RUN" if self.dry_run else ("SCHEDULE " + schedule_for[:16] if schedule_for else "LIVE")
+        mode_label = (
+            "DRY RUN"
+            if self.dry_run
+            else ("SCHEDULE " + schedule_for[:16] if schedule_for else "LIVE")
+        )
         print(f"\n📸 {metadata.get('title', folder.name)}")
         print(f"   slides: {len(slides)}")
         print(f"   caption: {len(caption_text)} chars")
@@ -443,21 +513,27 @@ class InstagramPublisher:
         self.click_share()
 
         # Update post-status.json
-        pub_status = "scheduled" if schedule_for and not self.dry_run else ("published" if not self.dry_run else "dry_run")
+        pub_status = (
+            "scheduled"
+            if schedule_for and not self.dry_run
+            else ("published" if not self.dry_run else "dry_run")
+        )
         status_file = folder / "post-status.json"
         status = json.loads(status_file.read_text()) if status_file.exists() else {}
-        status.update({
-            "status": pub_status,
-            "published": not self.dry_run and not schedule_for,
-            "published_at": datetime.now().isoformat(),
-            "scheduled_for": schedule_for,
-            "method": "playwright_web",
-            "username": self.creds["username"],
-            "post_url": None,
-            "notes": f"{'scheduled' if schedule_for else 'published'} via Playwright web automation on instagram.com",
-        })
+        status.update(
+            {
+                "status": pub_status,
+                "published": not self.dry_run and not schedule_for,
+                "published_at": datetime.now().isoformat(),
+                "scheduled_for": schedule_for,
+                "method": "playwright_web",
+                "username": self.creds["username"],
+                "post_url": None,
+                "notes": f"{'scheduled' if schedule_for else 'published'} via Playwright web automation on instagram.com",
+            }
+        )
         status_file.write_text(json.dumps(status, indent=2))
-        print(f"   post-status.json updated ✓\n")
+        print("   post-status.json updated ✓\n")
 
         return status
 
@@ -465,9 +541,20 @@ class InstagramPublisher:
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--folder", required=True, help="approved carousel folder path")
-    parser.add_argument("--headful", action="store_true", help="visible browser (required first run / 2FA)")
-    parser.add_argument("--dry-run", action="store_true", help="navigate but don't click Share")
-    parser.add_argument("--schedule", type=str, default=None, help="ISO datetime to schedule post (e.g., 2026-04-10T14:00:00)")
+    parser.add_argument(
+        "--headful",
+        action="store_true",
+        help="visible browser (required first run / 2FA)",
+    )
+    parser.add_argument(
+        "--dry-run", action="store_true", help="navigate but don't click Share"
+    )
+    parser.add_argument(
+        "--schedule",
+        type=str,
+        default=None,
+        help="ISO datetime to schedule post (e.g., 2026-04-10T14:00:00)",
+    )
     args = parser.parse_args()
 
     folder = Path(args.folder).resolve()

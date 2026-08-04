@@ -15,7 +15,9 @@ class RateLimitExceeded(Exception):
     def __init__(self, platform: str, reset_at: datetime):
         self.platform = platform
         self.reset_at = reset_at
-        super().__init__(f"Rate limit exceeded for {platform}. Resets at {reset_at.isoformat()}")
+        super().__init__(
+            f"Rate limit exceeded for {platform}. Resets at {reset_at.isoformat()}"
+        )
 
 
 @dataclass
@@ -52,7 +54,9 @@ class TokenManager:
 
     def _ensure_registered(self, platform: str) -> None:
         if platform not in self._platforms:
-            raise ValueError(f"Platform '{platform}' not registered. Call register_platform first.")
+            raise ValueError(
+                f"Platform '{platform}' not registered. Call register_platform first."
+            )
 
     def consume(self, platform: str, tokens: int = 1) -> bool:
         """Consume tokens from the platform's rate limit budget.

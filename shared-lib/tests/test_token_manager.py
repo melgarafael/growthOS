@@ -35,7 +35,9 @@ class TestRegistration:
         manager.consume("twitter")
         assert manager.remaining("twitter") == 4
         # Re-register with higher limit — existing timestamps should remain
-        manager.register_platform("twitter", RateLimits(max_requests=10, window_seconds=60))
+        manager.register_platform(
+            "twitter", RateLimits(max_requests=10, window_seconds=60)
+        )
         assert manager.remaining("twitter") == 9
 
 

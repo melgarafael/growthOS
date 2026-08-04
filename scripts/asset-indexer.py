@@ -21,9 +21,7 @@ SVG: lê paleta por regex simples dos fills/strokes.
 """
 
 import sys
-import os
 import re
-import json
 import subprocess
 from pathlib import Path
 from datetime import date, datetime
@@ -42,7 +40,9 @@ def ensure_deps():
     try:
         import yaml  # noqa
     except ImportError:
-        subprocess.run([sys.executable, "-m", "pip", "install", "-q", "pyyaml"], check=False)
+        subprocess.run(
+            [sys.executable, "-m", "pip", "install", "-q", "pyyaml"], check=False
+        )
 
 
 def infer_type(asset_path: Path) -> str:
@@ -64,10 +64,12 @@ def extract_svg_palette(svg_path: Path) -> list:
 def extract_image_palette(img_path: Path) -> list:
     try:
         from PIL import Image
+
         img = Image.open(img_path).convert("RGB")
         img.thumbnail((200, 200))
         pixels = list(img.getdata())
         from collections import Counter
+
         common = Counter(pixels).most_common(5)
         return ["#{:02X}{:02X}{:02X}".format(*rgb) for rgb, _ in common]
     except Exception:
@@ -95,6 +97,7 @@ def voice_fit_from_palette(palette: list) -> str:
 
 def index_one(asset_path: Path, skip_vision: bool = False) -> dict:
     import yaml
+
     META_DIR.mkdir(parents=True, exist_ok=True)
     asset_type = infer_type(asset_path)
     filename = asset_path.name
@@ -123,7 +126,9 @@ def index_one(asset_path: Path, skip_vision: bool = False) -> dict:
         "path": rel_path,
         "type": asset_type,
         "tags": derive_tags(filename, asset_type),
-        "suggested_use": ["hook", "demo"] if asset_type == "logo" else ["evidence", "demo"],
+        "suggested_use": ["hook", "demo"]
+        if asset_type == "logo"
+        else ["evidence", "demo"],
         "palette": palette,
         "dominant_color": palette[0] if palette else None,
         "voice_fit": voice_fit_from_palette(palette),
@@ -153,7 +158,6 @@ def index_one(asset_path: Path, skip_vision: bool = False) -> dict:
 
 
 def reindex_all(skip_vision: bool = False):
-    import yaml
     all_assets = []
     for cat in CATEGORIES:
         cat_dir = ASSETS / cat
@@ -191,8 +195,8 @@ def write_index(assets: list):
     lines = [
         "# Asset Library Index",
         "",
-        f"> **Auto-gerado por:** `growthOS/scripts/asset-indexer.py`",
-        f"> **Lido por:** `carousel-designer`, `content-creator`, `caption-writer`",
+        "> **Auto-gerado por:** `growthOS/scripts/asset-indexer.py`",
+        "> **Lido por:** `carousel-designer`, `content-creator`, `caption-writer`",
         f"> **Última atualização:** {date.today()}",
         f"> **Total assets:** {len(assets)}",
         "",
@@ -215,7 +219,12 @@ def write_index(assets: list):
     for a in assets:
         by_type.setdefault(a["type"], []).append(a)
 
-    icons = {"logo": "🎨 Logos", "screenshot": "📸 Screenshots", "icon": "🔣 Icons", "photo": "🖼 Photos"}
+    icons = {
+        "logo": "🎨 Logos",
+        "screenshot": "📸 Screenshots",
+        "icon": "🔣 Icons",
+        "photo": "🖼 Photos",
+    }
     for t in ["logo", "screenshot", "icon", "photo"]:
         lines.append(f"### {icons.get(t, t.title())}")
         lines.append("")
@@ -224,7 +233,9 @@ def write_index(assets: list):
             lines.append("|---|---|---|---|")
             for a in by_type[t]:
                 v = _vision_summary(a)
-                score_str = f"{v['fit_score']:.2f}" if v["fit_score"] is not None else "—"
+                score_str = (
+                    f"{v['fit_score']:.2f}" if v["fit_score"] is not None else "—"
+                )
                 lines.append(
                     f"| `{a['asset']}` ({v['status']}) | {score_str} | {v['subject']} | {v['topics']} |"
                 )
@@ -232,12 +243,14 @@ def write_index(assets: list):
             lines.append("_(vazio — adicione arquivos em `assets/" + t + "s/`)_")
         lines.append("")
 
-    lines.extend([
-        "---",
-        "",
-        "## Assets por brand_fit_score (ordem decrescente)",
-        "",
-    ])
+    lines.extend(
+        [
+            "---",
+            "",
+            "## Assets por brand_fit_score (ordem decrescente)",
+            "",
+        ]
+    )
     ranked = []
     for a in assets:
         v = a.get("vision") or {}
@@ -254,18 +267,20 @@ def write_index(assets: list):
         lines.append("_(nenhum asset analisado por vision ainda)_")
     lines.append("")
 
-    lines.extend([
-        "---",
-        "",
-        "## Como adicionar um novo asset",
-        "",
-        "```bash",
-        "cp ~/Downloads/asset.png growthOS/assets/logos/",
-        ".venv/bin/python growthOS/scripts/asset-indexer.py growthOS/assets/logos/asset.png",
-        "# depois, na conversa: 'analisa os assets pendentes'",
-        ".venv/bin/python growthOS/scripts/asset-indexer.py --reindex  # regenera INDEX.md",
-        "```",
-    ])
+    lines.extend(
+        [
+            "---",
+            "",
+            "## Como adicionar um novo asset",
+            "",
+            "```bash",
+            "cp ~/Downloads/asset.png growthOS/assets/logos/",
+            ".venv/bin/python growthOS/scripts/asset-indexer.py growthOS/assets/logos/asset.png",
+            "# depois, na conversa: 'analisa os assets pendentes'",
+            ".venv/bin/python growthOS/scripts/asset-indexer.py --reindex  # regenera INDEX.md",
+            "```",
+        ]
+    )
     INDEX_FILE.write_text("\n".join(lines))
 
 
@@ -274,8 +289,12 @@ def main():
     if len(sys.argv) < 2:
         print("usage:")
         print("  asset-indexer.py <path-to-asset>        # index + vision")
-        print("  asset-indexer.py <path> --no-vision     # index only, skip Claude Vision")
-        print("  asset-indexer.py --reindex              # reindex all + vision for new")
+        print(
+            "  asset-indexer.py <path> --no-vision     # index only, skip Claude Vision"
+        )
+        print(
+            "  asset-indexer.py --reindex              # reindex all + vision for new"
+        )
         print("  asset-indexer.py --reindex --no-vision  # reindex all, skip vision")
         sys.exit(1)
 

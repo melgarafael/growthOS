@@ -11,7 +11,6 @@ def _seed(text: str) -> int:
 
 
 class RedditDiscoveryAdapter(DiscoveryAdapter):
-
     @property
     def platform_name(self) -> str:
         return "reddit"
@@ -53,9 +52,21 @@ class RedditDiscoveryAdapter(DiscoveryAdapter):
             "topic": topic,
             "trending_hashtags": [],
             "trending_topics": [
-                {"topic": f"r/{topic.replace(' ', '').lower()}", "volume": 8500 + (s % 4000), "growth": "+32%"},
-                {"topic": f"{topic} megathread", "volume": 3200 + (s % 2000), "growth": "+20%"},
-                {"topic": f"ELI5: {topic}", "volume": 2100 + (s % 1000), "growth": "+10%"},
+                {
+                    "topic": f"r/{topic.replace(' ', '').lower()}",
+                    "volume": 8500 + (s % 4000),
+                    "growth": "+32%",
+                },
+                {
+                    "topic": f"{topic} megathread",
+                    "volume": 3200 + (s % 2000),
+                    "growth": "+20%",
+                },
+                {
+                    "topic": f"ELI5: {topic}",
+                    "volume": 2100 + (s % 1000),
+                    "growth": "+10%",
+                },
             ],
             "popular_formats": [
                 {"format": "detailed_text_post", "engagement_multiplier": 2.5},
@@ -91,10 +102,25 @@ class RedditDiscoveryAdapter(DiscoveryAdapter):
                     f"Tried {query} but went back to [competitor]. Here's why.",
                     f"PSA: {query} just released a major update. Worth checking out.",
                 ][i % 5],
-                "subreddit": ["r/technology", "r/startups", "r/programming", "r/SaaS", "r/software"][i % 5],
+                "subreddit": [
+                    "r/technology",
+                    "r/startups",
+                    "r/programming",
+                    "r/SaaS",
+                    "r/software",
+                ][i % 5],
                 "timestamp": f"2026-03-{28 + i}T{18 + i}:00:00Z",
-                "sentiment": ["positive", "neutral", "positive", "negative", "positive"][i % 5],
-                "engagement": {"upvotes": 85 + (s + i) % 60, "comments": 23 + (s + i) % 20},
+                "sentiment": [
+                    "positive",
+                    "neutral",
+                    "positive",
+                    "negative",
+                    "positive",
+                ][i % 5],
+                "engagement": {
+                    "upvotes": 85 + (s + i) % 60,
+                    "comments": 23 + (s + i) % 20,
+                },
                 "url": f"https://reddit.com/r/technology/comments/{s + i}",
             }
             for i in range(count)

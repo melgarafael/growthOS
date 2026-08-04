@@ -3,8 +3,6 @@ name: Deploy to Production
 on:
   push:
     branches: [main]
-    paths:
-      - "growthOS/**"
   workflow_dispatch:
 
 env:
@@ -26,28 +24,28 @@ jobs:
       matrix:
         include:
           - name: mcp-social-publish
-            dockerfile: growthOS/Dockerfile
-            context: growthOS
+            dockerfile: Dockerfile
+            context: .
             target: mcp-social-publish
           - name: mcp-social-discover
-            dockerfile: growthOS/Dockerfile
-            context: growthOS
+            dockerfile: Dockerfile
+            context: .
             target: mcp-social-discover
           - name: mcp-obsidian-vault
-            dockerfile: growthOS/Dockerfile
-            context: growthOS
+            dockerfile: Dockerfile
+            context: .
             target: mcp-obsidian-vault
           - name: review-server
-            dockerfile: growthOS/deploy/Dockerfile.review
-            context: growthOS
+            dockerfile: deploy/Dockerfile.review
+            context: .
             target: ""
           - name: ig-publisher
-            dockerfile: growthOS/deploy/Dockerfile.publisher
-            context: growthOS
+            dockerfile: deploy/Dockerfile.publisher
+            context: .
             target: ""
           - name: ship-queue
-            dockerfile: growthOS/deploy/Dockerfile.queue
-            context: growthOS
+            dockerfile: deploy/Dockerfile.queue
+            context: .
             target: ""
     steps:
       - uses: actions/checkout@v4

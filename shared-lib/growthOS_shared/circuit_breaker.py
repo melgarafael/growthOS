@@ -57,10 +57,11 @@ class CircuitBreaker:
                 f"Circuit is OPEN. Retry after {self.recovery_timeout}s."
             )
 
-        if current_state == CircuitState.HALF_OPEN and self._half_open_calls >= self.half_open_max:
-            raise CircuitOpenError(
-                "Circuit is HALF_OPEN and max probe calls reached."
-            )
+        if (
+            current_state == CircuitState.HALF_OPEN
+            and self._half_open_calls >= self.half_open_max
+        ):
+            raise CircuitOpenError("Circuit is HALF_OPEN and max probe calls reached.")
 
         try:
             if current_state == CircuitState.HALF_OPEN:

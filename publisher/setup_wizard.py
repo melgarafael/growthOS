@@ -39,6 +39,7 @@ def ensure_playwright():
     box("STEP 1/3 — Playwright + Chromium")
     try:
         import playwright  # noqa
+
         print("  ✅ playwright already installed")
     except ImportError:
         print("  📦 installing playwright in growthOS venv...")
@@ -47,12 +48,22 @@ def ensure_playwright():
             subprocess.run([str(venv_pip), "install", "-q", "playwright"], check=True)
         else:
             subprocess.run(
-                [sys.executable, "-m", "pip", "install", "-q", "--break-system-packages", "playwright"],
+                [
+                    sys.executable,
+                    "-m",
+                    "pip",
+                    "install",
+                    "-q",
+                    "--break-system-packages",
+                    "playwright",
+                ],
                 check=True,
             )
     # Install Chromium browser
     print("  🎭 ensuring Chromium is installed...")
-    subprocess.run([sys.executable, "-m", "playwright", "install", "chromium"], check=False)
+    subprocess.run(
+        [sys.executable, "-m", "playwright", "install", "chromium"], check=False
+    )
     print("  ✅ ready")
 
 
@@ -91,7 +102,7 @@ def save_credentials(creds: dict):
 
 def run_manual_login():
     box("STEP 3/3 — Manual login (headful Chrome)")
-    print(f"""
+    print("""
   Vou abrir o Chrome visível agora.
   Faz o login com 2FA tranquilo — sem pressa, você tem 15 minutos.
 

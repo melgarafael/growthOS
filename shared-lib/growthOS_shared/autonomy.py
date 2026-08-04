@@ -25,28 +25,34 @@ class ActionType(str, Enum):
 
 
 # Actions classified by tier — used to decide approval requirements.
-INTERNAL_ACTIONS = frozenset({
-    "read_note",
-    "search_notes",
-    "get_analytics",
-    "list_drafts",
-    "get_config",
-})
+INTERNAL_ACTIONS = frozenset(
+    {
+        "read_note",
+        "search_notes",
+        "get_analytics",
+        "list_drafts",
+        "get_config",
+    }
+)
 
-CREATION_ACTIONS = frozenset({
-    "create_note",
-    "generate_content",
-    "create_draft",
-    "edit_draft",
-})
+CREATION_ACTIONS = frozenset(
+    {
+        "create_note",
+        "generate_content",
+        "create_draft",
+        "edit_draft",
+    }
+)
 
-EXTERNAL_ACTIONS = frozenset({
-    "publish_post",
-    "schedule_post",
-    "delete_post",
-    "update_post",
-    "send_notification",
-})
+EXTERNAL_ACTIONS = frozenset(
+    {
+        "publish_post",
+        "schedule_post",
+        "delete_post",
+        "update_post",
+        "send_notification",
+    }
+)
 
 
 class KillSwitchActiveError(Exception):
@@ -73,8 +79,7 @@ class AutonomyManager:
             self._config = brand_config.autonomy
 
         self._config_dir = Path(
-            config_dir
-            or os.environ.get("GROWTHOS_CONFIG_DIR", ".growthOS")
+            config_dir or os.environ.get("GROWTHOS_CONFIG_DIR", ".growthOS")
         )
         self._config_dir.mkdir(parents=True, exist_ok=True)
 

@@ -152,12 +152,8 @@ async def test_search_notes():
 
 @pytest.mark.asyncio
 async def test_search_with_tags():
-    await srv.create_note(
-        path="tag1", title="T1", content="Content", tags=["python"]
-    )
-    await srv.create_note(
-        path="tag2", title="T2", content="Content", tags=["cooking"]
-    )
+    await srv.create_note(path="tag1", title="T1", content="Content", tags=["python"])
+    await srv.create_note(path="tag2", title="T2", content="Content", tags=["cooking"])
     result = await srv.search_notes(query="Content", tags=["python"])
     assert result["count"] == 1
 

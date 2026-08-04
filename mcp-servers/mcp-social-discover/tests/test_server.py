@@ -76,7 +76,10 @@ class TestPlatformAdapters:
 
 class TestGetAnalytics:
     @pytest.mark.asyncio
-    @pytest.mark.parametrize("cls", [LinkedInDiscoveryAdapter, TwitterDiscoveryAdapter, RedditDiscoveryAdapter])
+    @pytest.mark.parametrize(
+        "cls",
+        [LinkedInDiscoveryAdapter, TwitterDiscoveryAdapter, RedditDiscoveryAdapter],
+    )
     async def test_returns_required_fields(self, cls):
         adapter = cls()
         result = await adapter.get_analytics("2026-03-01", "2026-03-31")
@@ -90,7 +93,10 @@ class TestGetAnalytics:
         assert result["_mock"] is True
 
     @pytest.mark.asyncio
-    @pytest.mark.parametrize("cls", [LinkedInDiscoveryAdapter, TwitterDiscoveryAdapter, RedditDiscoveryAdapter])
+    @pytest.mark.parametrize(
+        "cls",
+        [LinkedInDiscoveryAdapter, TwitterDiscoveryAdapter, RedditDiscoveryAdapter],
+    )
     async def test_period_matches_input(self, cls):
         adapter = cls()
         result = await adapter.get_analytics("2026-01-01", "2026-01-31")
@@ -98,7 +104,10 @@ class TestGetAnalytics:
         assert result["period"]["to"] == "2026-01-31"
 
     @pytest.mark.asyncio
-    @pytest.mark.parametrize("cls", [LinkedInDiscoveryAdapter, TwitterDiscoveryAdapter, RedditDiscoveryAdapter])
+    @pytest.mark.parametrize(
+        "cls",
+        [LinkedInDiscoveryAdapter, TwitterDiscoveryAdapter, RedditDiscoveryAdapter],
+    )
     async def test_metrics_are_positive(self, cls):
         adapter = cls()
         result = await adapter.get_analytics("2026-03-01", "2026-03-31")
@@ -119,7 +128,10 @@ class TestGetAnalytics:
 
 class TestDiscoverTrends:
     @pytest.mark.asyncio
-    @pytest.mark.parametrize("cls", [LinkedInDiscoveryAdapter, TwitterDiscoveryAdapter, RedditDiscoveryAdapter])
+    @pytest.mark.parametrize(
+        "cls",
+        [LinkedInDiscoveryAdapter, TwitterDiscoveryAdapter, RedditDiscoveryAdapter],
+    )
     async def test_returns_required_fields(self, cls):
         adapter = cls()
         result = await adapter.discover_trends("AI marketing")
@@ -132,7 +144,10 @@ class TestDiscoverTrends:
         assert result["_mock"] is True
 
     @pytest.mark.asyncio
-    @pytest.mark.parametrize("cls", [LinkedInDiscoveryAdapter, TwitterDiscoveryAdapter, RedditDiscoveryAdapter])
+    @pytest.mark.parametrize(
+        "cls",
+        [LinkedInDiscoveryAdapter, TwitterDiscoveryAdapter, RedditDiscoveryAdapter],
+    )
     async def test_trending_topics_have_volume(self, cls):
         adapter = cls()
         result = await adapter.discover_trends("developer tools")
@@ -142,7 +157,10 @@ class TestDiscoverTrends:
             assert topic["volume"] > 0
 
     @pytest.mark.asyncio
-    @pytest.mark.parametrize("cls", [LinkedInDiscoveryAdapter, TwitterDiscoveryAdapter, RedditDiscoveryAdapter])
+    @pytest.mark.parametrize(
+        "cls",
+        [LinkedInDiscoveryAdapter, TwitterDiscoveryAdapter, RedditDiscoveryAdapter],
+    )
     async def test_popular_formats_have_multiplier(self, cls):
         adapter = cls()
         result = await adapter.discover_trends("startup")
@@ -157,7 +175,10 @@ class TestDiscoverTrends:
 
 class TestSearchMentions:
     @pytest.mark.asyncio
-    @pytest.mark.parametrize("cls", [LinkedInDiscoveryAdapter, TwitterDiscoveryAdapter, RedditDiscoveryAdapter])
+    @pytest.mark.parametrize(
+        "cls",
+        [LinkedInDiscoveryAdapter, TwitterDiscoveryAdapter, RedditDiscoveryAdapter],
+    )
     async def test_returns_required_fields(self, cls):
         adapter = cls()
         result = await adapter.search_mentions("GrowthOS")
@@ -169,7 +190,10 @@ class TestSearchMentions:
         assert result["_mock"] is True
 
     @pytest.mark.asyncio
-    @pytest.mark.parametrize("cls", [LinkedInDiscoveryAdapter, TwitterDiscoveryAdapter, RedditDiscoveryAdapter])
+    @pytest.mark.parametrize(
+        "cls",
+        [LinkedInDiscoveryAdapter, TwitterDiscoveryAdapter, RedditDiscoveryAdapter],
+    )
     async def test_mentions_have_sentiment(self, cls):
         adapter = cls()
         result = await adapter.search_mentions("TestBrand")
@@ -178,14 +202,20 @@ class TestSearchMentions:
             assert mention["sentiment"] in {"positive", "neutral", "negative"}
 
     @pytest.mark.asyncio
-    @pytest.mark.parametrize("cls", [LinkedInDiscoveryAdapter, TwitterDiscoveryAdapter, RedditDiscoveryAdapter])
+    @pytest.mark.parametrize(
+        "cls",
+        [LinkedInDiscoveryAdapter, TwitterDiscoveryAdapter, RedditDiscoveryAdapter],
+    )
     async def test_limit_caps_mentions(self, cls):
         adapter = cls()
         result = await adapter.search_mentions("TestBrand", limit=3)
         assert len(result["mentions"]) <= 3
 
     @pytest.mark.asyncio
-    @pytest.mark.parametrize("cls", [LinkedInDiscoveryAdapter, TwitterDiscoveryAdapter, RedditDiscoveryAdapter])
+    @pytest.mark.parametrize(
+        "cls",
+        [LinkedInDiscoveryAdapter, TwitterDiscoveryAdapter, RedditDiscoveryAdapter],
+    )
     async def test_sentiment_breakdown_has_all_categories(self, cls):
         adapter = cls()
         result = await adapter.search_mentions("TestBrand")
@@ -200,7 +230,10 @@ class TestSearchMentions:
 
 class TestGetCompetitorActivity:
     @pytest.mark.asyncio
-    @pytest.mark.parametrize("cls", [LinkedInDiscoveryAdapter, TwitterDiscoveryAdapter, RedditDiscoveryAdapter])
+    @pytest.mark.parametrize(
+        "cls",
+        [LinkedInDiscoveryAdapter, TwitterDiscoveryAdapter, RedditDiscoveryAdapter],
+    )
     async def test_returns_required_fields(self, cls):
         adapter = cls()
         result = await adapter.get_competitor_activity("CompetitorCo")
@@ -211,7 +244,10 @@ class TestGetCompetitorActivity:
         assert result["_mock"] is True
 
     @pytest.mark.asyncio
-    @pytest.mark.parametrize("cls", [LinkedInDiscoveryAdapter, TwitterDiscoveryAdapter, RedditDiscoveryAdapter])
+    @pytest.mark.parametrize(
+        "cls",
+        [LinkedInDiscoveryAdapter, TwitterDiscoveryAdapter, RedditDiscoveryAdapter],
+    )
     async def test_recent_posts_are_list(self, cls):
         adapter = cls()
         result = await adapter.get_competitor_activity("Rival")
@@ -224,7 +260,10 @@ class TestGetCompetitorActivity:
 
 class TestGetHashtagPerformance:
     @pytest.mark.asyncio
-    @pytest.mark.parametrize("cls", [LinkedInDiscoveryAdapter, TwitterDiscoveryAdapter, RedditDiscoveryAdapter])
+    @pytest.mark.parametrize(
+        "cls",
+        [LinkedInDiscoveryAdapter, TwitterDiscoveryAdapter, RedditDiscoveryAdapter],
+    )
     async def test_returns_required_fields(self, cls):
         adapter = cls()
         result = await adapter.get_hashtag_performance("#AI")
@@ -237,7 +276,10 @@ class TestGetHashtagPerformance:
         assert result["_mock"] is True
 
     @pytest.mark.asyncio
-    @pytest.mark.parametrize("cls", [LinkedInDiscoveryAdapter, TwitterDiscoveryAdapter, RedditDiscoveryAdapter])
+    @pytest.mark.parametrize(
+        "cls",
+        [LinkedInDiscoveryAdapter, TwitterDiscoveryAdapter, RedditDiscoveryAdapter],
+    )
     async def test_strips_leading_hash(self, cls):
         adapter = cls()
         r1 = await adapter.get_hashtag_performance("#Python")
@@ -246,7 +288,10 @@ class TestGetHashtagPerformance:
         assert r2["hashtag"] == "#Python"
 
     @pytest.mark.asyncio
-    @pytest.mark.parametrize("cls", [LinkedInDiscoveryAdapter, TwitterDiscoveryAdapter, RedditDiscoveryAdapter])
+    @pytest.mark.parametrize(
+        "cls",
+        [LinkedInDiscoveryAdapter, TwitterDiscoveryAdapter, RedditDiscoveryAdapter],
+    )
     async def test_metrics_are_positive(self, cls):
         adapter = cls()
         result = await adapter.get_hashtag_performance("Tech")
@@ -264,6 +309,7 @@ class TestServerTools:
     @pytest.fixture(autouse=True)
     def _setup_server(self):
         import server
+
         self.server = server
 
     @pytest.mark.asyncio
@@ -306,9 +352,7 @@ class TestServerTools:
     @pytest.mark.asyncio
     async def test_discover_trends_unknown_platform(self):
         with pytest.raises(ValueError, match="Unknown platform"):
-            await self.server.discover_trends(
-                topic="test", platforms=["tiktok"]
-            )
+            await self.server.discover_trends(topic="test", platforms=["tiktok"])
 
     @pytest.mark.asyncio
     async def test_search_mentions_all_platforms(self):
@@ -320,18 +364,14 @@ class TestServerTools:
 
     @pytest.mark.asyncio
     async def test_search_mentions_with_limit(self):
-        result = await self.server.search_mentions(
-            query="TestBrand", limit=2
-        )
+        result = await self.server.search_mentions(query="TestBrand", limit=2)
         assert result["status"] == "ok"
         for platform_data in result["platforms"].values():
             assert len(platform_data["mentions"]) <= 2
 
     @pytest.mark.asyncio
     async def test_search_mentions_single_platform(self):
-        result = await self.server.search_mentions(
-            query="brand", platforms=["reddit"]
-        )
+        result = await self.server.search_mentions(query="brand", platforms=["reddit"])
         assert result["status"] == "ok"
         assert set(result["platforms"].keys()) == {"reddit"}
 
@@ -375,6 +415,7 @@ class TestHelpers:
     @pytest.fixture(autouse=True)
     def _setup_server(self):
         import server
+
         self.server = server
 
     def test_query_hash_is_deterministic(self):

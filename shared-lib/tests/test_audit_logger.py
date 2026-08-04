@@ -24,7 +24,9 @@ class TestDirectorySetup:
         AuditLogger(log_dir=str(audit_dir))
         assert audit_dir.exists()
 
-    def test_env_var_override(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    def test_env_var_override(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
         custom_dir = tmp_path / "custom_audit"
         monkeypatch.setenv("GROWTHOS_AUDIT_DIR", str(custom_dir))
         logger = AuditLogger()  # no explicit log_dir
@@ -79,7 +81,9 @@ class TestLogAction:
 
     def test_custom_metadata(self, logger: AuditLogger, audit_dir: Path) -> None:
         logger.log_action(
-            "publish", "twitter", "h1",
+            "publish",
+            "twitter",
+            "h1",
             user="rafael",
             status="pending",
             metadata={"tweet_id": "12345", "chars": 280},
@@ -123,7 +127,9 @@ class TestGetEntries:
         logger.log_action("publish", "linkedin", "h2")
         logger.log_action("draft", "twitter", "h3")
 
-        entries = logger.get_entries(filters={"action": "publish", "platform": "twitter"})
+        entries = logger.get_entries(
+            filters={"action": "publish", "platform": "twitter"}
+        )
         assert len(entries) == 1
 
     def test_no_match_returns_empty(self, logger: AuditLogger) -> None:

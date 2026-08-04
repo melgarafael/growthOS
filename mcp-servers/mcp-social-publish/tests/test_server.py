@@ -220,7 +220,10 @@ class TestServerTools:
             dry_run=False,
         )
         assert result["status"] == "error"
-        assert any("credentials" in e.lower() or "not configured" in e.lower() for e in result["errors"])
+        assert any(
+            "credentials" in e.lower() or "not configured" in e.lower()
+            for e in result["errors"]
+        )
 
     @pytest.mark.asyncio
     async def test_preview_post(self):

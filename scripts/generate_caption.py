@@ -35,8 +35,12 @@ GROWTHOS = REPO_ROOT / "growthOS"
 DESIGN_SYSTEM = GROWTHOS / "design-system"
 
 CORE_HASHTAGS = [
-    "#automatiklabs", "#melgarafael", "#iaparaempresarios",
-    "#agentesdeia", "#automacao", "#vibecoding",
+    "#automatiklabs",
+    "#melgarafael",
+    "#iaparaempresarios",
+    "#agentesdeia",
+    "#automacao",
+    "#vibecoding",
 ]
 
 CATEGORY_HASHTAGS = {
@@ -46,7 +50,13 @@ CATEGORY_HASHTAGS = {
     "venda": ["#vendascomia", "#outbound", "#b2b"],
 }
 
-VOLUME_HASHTAGS = ["#claudecode", "#anthropic", "#automation", "#ai2026", "#startupbrasil"]
+VOLUME_HASHTAGS = [
+    "#claudecode",
+    "#anthropic",
+    "#automation",
+    "#ai2026",
+    "#startupbrasil",
+]
 
 
 def load_metadata(folder: Path) -> dict:
@@ -77,10 +87,14 @@ def extract_hook_from_html(html_file: Path, cid: str) -> str:
         section = m.group(1)
         # Find first .slide or .cover content
         # Grab the first big text (h1/h2/display class)
-        text_matches = re.findall(r'<(?:h1|h2|div[^>]*class="[^"]*display[^"]*")[^>]*>(.*?)</(?:h1|h2|div)>', section, re.DOTALL)
+        text_matches = re.findall(
+            r'<(?:h1|h2|div[^>]*class="[^"]*display[^"]*")[^>]*>(.*?)</(?:h1|h2|div)>',
+            section,
+            re.DOTALL,
+        )
         if text_matches:
-            hook = re.sub(r'<[^>]+>', '', text_matches[0])
-            hook = re.sub(r'\s+', ' ', hook).strip()
+            hook = re.sub(r"<[^>]+>", "", text_matches[0])
+            hook = re.sub(r"\s+", " ", hook).strip()
             return hook[:200]
         return ""
     except Exception:
@@ -88,7 +102,10 @@ def extract_hook_from_html(html_file: Path, cid: str) -> str:
 
 
 def build_caption(metadata: dict, hook: str = "") -> str:
-    title = metadata.get("title", "").strip() or metadata.get("slug", "").replace("-", " ").title()
+    title = (
+        metadata.get("title", "").strip()
+        or metadata.get("slug", "").replace("-", " ").title()
+    )
     category = metadata.get("category", "lead-capture")
     code = metadata.get("code", "").upper()
     bonus = metadata.get("bonus", "").strip()
@@ -113,14 +130,16 @@ def build_caption(metadata: dict, hook: str = "") -> str:
         )
     else:
         cta = (
-            f"Segue **@melgarafael** pra mais conteúdo direto ao ponto.\n\n"
-            f"Dia **16/04 às 14h** tem live no YouTube. "
-            f"Comenta **LIVE** aqui que mando o link no direct. Tamo junto."
+            "Segue **@melgarafael** pra mais conteúdo direto ao ponto.\n\n"
+            "Dia **16/04 às 14h** tem live no YouTube. "
+            "Comenta **LIVE** aqui que mando o link no direct. Tamo junto."
         )
 
     # Hashtags
     cat_tags = CATEGORY_HASHTAGS.get(category, [])
-    all_tags = list(dict.fromkeys(CORE_HASHTAGS + cat_tags + VOLUME_HASHTAGS))  # dedupe, preserve order
+    all_tags = list(
+        dict.fromkeys(CORE_HASHTAGS + cat_tags + VOLUME_HASHTAGS)
+    )  # dedupe, preserve order
     hashtags = " ".join(all_tags[:15])
 
     # First comment
@@ -154,7 +173,7 @@ def build_caption(metadata: dict, hook: str = "") -> str:
 {first_comment}
 
 ## Metadata
-- **carousel:** {metadata.get('carousel_id', '')}
+- **carousel:** {metadata.get("carousel_id", "")}
 - **category:** {category}
 - **code:** {code}
 - **bonus:** {bonus}

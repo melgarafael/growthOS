@@ -12,7 +12,6 @@ def _seed(text: str) -> int:
 
 
 class LinkedInDiscoveryAdapter(DiscoveryAdapter):
-
     @property
     def platform_name(self) -> str:
         return "linkedin"
@@ -58,9 +57,21 @@ class LinkedInDiscoveryAdapter(DiscoveryAdapter):
                 "#TechTrends",
             ],
             "trending_topics": [
-                {"topic": f"AI in {topic}", "volume": 15000 + (s % 5000), "growth": "+23%"},
-                {"topic": f"{topic} best practices", "volume": 8200 + (s % 3000), "growth": "+15%"},
-                {"topic": f"Remote {topic}", "volume": 6100 + (s % 2000), "growth": "+8%"},
+                {
+                    "topic": f"AI in {topic}",
+                    "volume": 15000 + (s % 5000),
+                    "growth": "+23%",
+                },
+                {
+                    "topic": f"{topic} best practices",
+                    "volume": 8200 + (s % 3000),
+                    "growth": "+15%",
+                },
+                {
+                    "topic": f"Remote {topic}",
+                    "volume": 6100 + (s % 2000),
+                    "growth": "+8%",
+                },
             ],
             "popular_formats": [
                 {"format": "carousel", "engagement_multiplier": 2.1},
@@ -85,8 +96,17 @@ class LinkedInDiscoveryAdapter(DiscoveryAdapter):
                 "author": f"Professional User {i + 1}",
                 "content": f"Great insights from {query} on building scalable teams. Highly recommend their approach.",
                 "timestamp": f"2026-03-{28 + i}T10:{i * 15:02d}:00Z",
-                "sentiment": ["positive", "positive", "neutral", "positive", "negative"][i % 5],
-                "engagement": {"likes": 45 + (s + i) % 30, "comments": 8 + (s + i) % 10},
+                "sentiment": [
+                    "positive",
+                    "positive",
+                    "neutral",
+                    "positive",
+                    "negative",
+                ][i % 5],
+                "engagement": {
+                    "likes": 45 + (s + i) % 30,
+                    "comments": 8 + (s + i) % 10,
+                },
                 "url": f"https://linkedin.com/posts/{s + i}",
             }
             for i in range(count)
@@ -129,7 +149,11 @@ class LinkedInDiscoveryAdapter(DiscoveryAdapter):
             "top_content": {
                 "best_format": "carousel",
                 "best_posting_time": "Tuesday 9:00 AM",
-                "most_used_hashtags": ["#Innovation", "#Growth", f"#{competitor.replace(' ', '')}"],
+                "most_used_hashtags": [
+                    "#Innovation",
+                    "#Growth",
+                    f"#{competitor.replace(' ', '')}",
+                ],
             },
             "_mock": True,
         }
@@ -144,7 +168,12 @@ class LinkedInDiscoveryAdapter(DiscoveryAdapter):
             "posts_count": 1200 + (s % 800),
             "engagement_rate": round(3.5 + (s % 40) / 10, 1),
             "peak_hours": ["9:00 AM", "12:00 PM", "5:00 PM"],
-            "related_hashtags": [f"#{tag}Tips", "#Professional", "#Industry", "#Growth"],
+            "related_hashtags": [
+                f"#{tag}Tips",
+                "#Professional",
+                "#Industry",
+                "#Growth",
+            ],
             "trend": "rising" if s % 3 == 0 else "stable",
             "_mock": True,
         }

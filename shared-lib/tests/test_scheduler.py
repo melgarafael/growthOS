@@ -221,9 +221,21 @@ class TestScheduleConfig:
     def _config_with_schedules(self) -> ScheduleConfig:
         return ScheduleConfig(
             schedules=[
-                ScheduleDefinition(name="daily", cron="0 9 * * *", action="publish", enabled=True),
-                ScheduleDefinition(name="weekly", cron="0 10 * * 1", action="review_calendar", enabled=True),
-                ScheduleDefinition(name="disabled", cron="0 0 * * *", action="content_check", enabled=False),
+                ScheduleDefinition(
+                    name="daily", cron="0 9 * * *", action="publish", enabled=True
+                ),
+                ScheduleDefinition(
+                    name="weekly",
+                    cron="0 10 * * 1",
+                    action="review_calendar",
+                    enabled=True,
+                ),
+                ScheduleDefinition(
+                    name="disabled",
+                    cron="0 0 * * *",
+                    action="content_check",
+                    enabled=False,
+                ),
             ]
         )
 
@@ -254,8 +266,12 @@ class TestScheduleConfig:
     def test_get_enabled_all_disabled(self) -> None:
         cfg = ScheduleConfig(
             schedules=[
-                ScheduleDefinition(name="a", cron="0 0 * * *", action="x", enabled=False),
-                ScheduleDefinition(name="b", cron="0 0 * * *", action="y", enabled=False),
+                ScheduleDefinition(
+                    name="a", cron="0 0 * * *", action="x", enabled=False
+                ),
+                ScheduleDefinition(
+                    name="b", cron="0 0 * * *", action="y", enabled=False
+                ),
             ]
         )
         assert cfg.get_enabled() == []
@@ -413,7 +429,9 @@ class TestRetryWithBackoff:
         async def mock_sleep(delay: float) -> None:
             sleep_calls.append(delay)
 
-        func = AsyncMock(side_effect=[TimeoutError(), TimeoutError(), TimeoutError(), "ok"])
+        func = AsyncMock(
+            side_effect=[TimeoutError(), TimeoutError(), TimeoutError(), "ok"]
+        )
         cfg = RetryConfig(max_retries=3, base_delay=1.0, max_delay=5.0, jitter=False)
         with patch("growthOS_shared.scheduler.asyncio.sleep", side_effect=mock_sleep):
             await retry_with_backoff(func, config=cfg)
@@ -429,7 +447,9 @@ class TestRetryWithBackoff:
         async def mock_sleep(delay: float) -> None:
             sleep_calls.append(delay)
 
-        func = AsyncMock(side_effect=[TimeoutError(), TimeoutError(), TimeoutError(), "ok"])
+        func = AsyncMock(
+            side_effect=[TimeoutError(), TimeoutError(), TimeoutError(), "ok"]
+        )
         cfg = RetryConfig(max_retries=3, base_delay=1.0, max_delay=100.0, jitter=False)
         with patch("growthOS_shared.scheduler.asyncio.sleep", side_effect=mock_sleep):
             await retry_with_backoff(func, config=cfg)
@@ -486,8 +506,11 @@ class TestPublishResult:
     def test_create_failure(self) -> None:
         entry = _make_entry()
         pr = PublishResult(
-            entry=entry, success=False, action_taken="failed",
-            error="timeout", attempts=3,
+            entry=entry,
+            success=False,
+            action_taken="failed",
+            error="timeout",
+            attempts=3,
         )
         assert pr.success is False
         assert pr.error == "timeout"
@@ -728,7 +751,9 @@ class TestBuildCronPrompt:
         assert "@cmo" in prompt
 
     def test_custom_agent(self) -> None:
-        sd = ScheduleDefinition(name="x", cron="0 9 * * *", action="review_calendar", agent="social")
+        sd = ScheduleDefinition(
+            name="x", cron="0 9 * * *", action="review_calendar", agent="social"
+        )
         prompt = build_cron_prompt(sd)
         assert "@social" in prompt
         assert "review_calendar" in prompt
@@ -760,9 +785,15 @@ class TestPrepareCronJobs:
     def test_converts_enabled_only(self) -> None:
         cfg = ScheduleConfig(
             schedules=[
-                ScheduleDefinition(name="a", cron="0 9 * * *", action="publish", enabled=True),
-                ScheduleDefinition(name="b", cron="0 10 * * *", action="review_calendar", enabled=False),
-                ScheduleDefinition(name="c", cron="0 11 * * *", action="content_check", enabled=True),
+                ScheduleDefinition(
+                    name="a", cron="0 9 * * *", action="publish", enabled=True
+                ),
+                ScheduleDefinition(
+                    name="b", cron="0 10 * * *", action="review_calendar", enabled=False
+                ),
+                ScheduleDefinition(
+                    name="c", cron="0 11 * * *", action="content_check", enabled=True
+                ),
             ]
         )
         jobs = prepare_cron_jobs(cfg)
@@ -795,9 +826,15 @@ class TestPrepareCronJobs:
     def test_preserves_order(self) -> None:
         cfg = ScheduleConfig(
             schedules=[
-                ScheduleDefinition(name="first", cron="0 1 * * *", action="a", enabled=True),
-                ScheduleDefinition(name="second", cron="0 2 * * *", action="b", enabled=True),
-                ScheduleDefinition(name="third", cron="0 3 * * *", action="c", enabled=True),
+                ScheduleDefinition(
+                    name="first", cron="0 1 * * *", action="a", enabled=True
+                ),
+                ScheduleDefinition(
+                    name="second", cron="0 2 * * *", action="b", enabled=True
+                ),
+                ScheduleDefinition(
+                    name="third", cron="0 3 * * *", action="c", enabled=True
+                ),
             ]
         )
         jobs = prepare_cron_jobs(cfg)
@@ -810,7 +847,9 @@ class TestRegisteredJob:
         assert job.job_id is None
 
     def test_with_job_id(self) -> None:
-        job = RegisteredJob(name="test", cron="0 0 * * *", prompt="do something", job_id="abc-123")
+        job = RegisteredJob(
+            name="test", cron="0 0 * * *", prompt="do something", job_id="abc-123"
+        )
         assert job.job_id == "abc-123"
 
     def test_fields(self) -> None:

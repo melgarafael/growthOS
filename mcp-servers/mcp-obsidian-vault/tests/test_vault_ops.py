@@ -49,7 +49,11 @@ class TestCreate:
             "note",
             "My Note",
             "Body text",
-            frontmatter_data={"tags": ["ai", "growth"], "type": "idea", "status": "draft"},
+            frontmatter_data={
+                "tags": ["ai", "growth"],
+                "type": "idea",
+                "status": "draft",
+            },
         )
         data = vault.read("note")
         assert data["frontmatter"]["title"] == "My Note"
@@ -121,7 +125,9 @@ class TestUpdate:
 
     def test_update_frontmatter(self, vault):
         vault.create("updatable2", "Note", "Body")
-        vault.update("updatable2", frontmatter_updates={"status": "published", "tags": ["new"]})
+        vault.update(
+            "updatable2", frontmatter_updates={"status": "published", "tags": ["new"]}
+        )
         data = vault.read("updatable2")
         assert data["frontmatter"]["status"] == "published"
         assert data["frontmatter"]["tags"] == ["new"]
@@ -129,7 +135,9 @@ class TestUpdate:
 
     def test_update_both(self, vault):
         vault.create("updatable3", "Note", "Old")
-        vault.update("updatable3", content="New", frontmatter_updates={"type": "article"})
+        vault.update(
+            "updatable3", content="New", frontmatter_updates={"type": "article"}
+        )
         data = vault.read("updatable3")
         assert data["content"] == "New"
         assert data["frontmatter"]["type"] == "article"

@@ -207,9 +207,7 @@ async def render_video(
             stderr=asyncio.subprocess.PIPE,
             cwd=str(remotion_dir),
         )
-        stdout, stderr = await asyncio.wait_for(
-            process.communicate(), timeout=300
-        )
+        stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=300)
     except asyncio.TimeoutError:
         process.kill()
         raise RuntimeError(
@@ -322,9 +320,7 @@ async def preview_composition(
             stderr=asyncio.subprocess.PIPE,
             cwd=str(remotion_dir),
         )
-        stdout, stderr = await asyncio.wait_for(
-            process.communicate(), timeout=120
-        )
+        stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=120)
     except asyncio.TimeoutError:
         process.kill()
         raise RuntimeError(
@@ -386,9 +382,7 @@ async def render_custom(
             stderr=asyncio.subprocess.PIPE,
             cwd=str(remotion_dir),
         )
-        stdout, stderr = await asyncio.wait_for(
-            process.communicate(), timeout=300
-        )
+        stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=300)
     except asyncio.TimeoutError:
         process.kill()
         raise RuntimeError(
@@ -411,3 +405,7 @@ async def render_custom(
         "path": output_path,
         "render_time_seconds": round(render_time, 2),
     }
+
+
+if __name__ == "__main__":
+    mcp.run()

@@ -11,7 +11,6 @@ def _seed(text: str) -> int:
 
 
 class TwitterDiscoveryAdapter(DiscoveryAdapter):
-
     @property
     def platform_name(self) -> str:
         return "twitter"
@@ -57,9 +56,21 @@ class TwitterDiscoveryAdapter(DiscoveryAdapter):
                 "#Trending",
             ],
             "trending_topics": [
-                {"topic": f"{topic} drama", "volume": 52000 + (s % 20000), "growth": "+45%"},
-                {"topic": f"Why {topic} matters", "volume": 23000 + (s % 10000), "growth": "+18%"},
-                {"topic": f"{topic} alternatives", "volume": 14000 + (s % 5000), "growth": "+12%"},
+                {
+                    "topic": f"{topic} drama",
+                    "volume": 52000 + (s % 20000),
+                    "growth": "+45%",
+                },
+                {
+                    "topic": f"Why {topic} matters",
+                    "volume": 23000 + (s % 10000),
+                    "growth": "+18%",
+                },
+                {
+                    "topic": f"{topic} alternatives",
+                    "volume": 14000 + (s % 5000),
+                    "growth": "+12%",
+                },
             ],
             "popular_formats": [
                 {"format": "thread", "engagement_multiplier": 3.2},
@@ -90,8 +101,18 @@ class TwitterDiscoveryAdapter(DiscoveryAdapter):
                     f"Great thread by {query} team on scaling challenges.",
                 ][i % 5],
                 "timestamp": f"2026-03-{28 + i}T{14 + i}:30:00Z",
-                "sentiment": ["positive", "neutral", "positive", "negative", "positive"][i % 5],
-                "engagement": {"likes": 120 + (s + i) % 100, "retweets": 35 + (s + i) % 30, "replies": 18 + (s + i) % 15},
+                "sentiment": [
+                    "positive",
+                    "neutral",
+                    "positive",
+                    "negative",
+                    "positive",
+                ][i % 5],
+                "engagement": {
+                    "likes": 120 + (s + i) % 100,
+                    "retweets": 35 + (s + i) % 30,
+                    "replies": 18 + (s + i) % 15,
+                },
                 "url": f"https://x.com/user_{s + i}/status/{s + i}",
             }
             for i in range(count)
@@ -134,7 +155,11 @@ class TwitterDiscoveryAdapter(DiscoveryAdapter):
             "top_content": {
                 "best_format": "thread",
                 "best_posting_time": "Monday 10:00 AM",
-                "most_used_hashtags": ["#BuildInPublic", "#StartupLife", f"#{competitor.replace(' ', '')}"],
+                "most_used_hashtags": [
+                    "#BuildInPublic",
+                    "#StartupLife",
+                    f"#{competitor.replace(' ', '')}",
+                ],
             },
             "_mock": True,
         }

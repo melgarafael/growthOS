@@ -40,9 +40,7 @@ class TestListTemplates:
         }
         for name, template in result["templates"].items():
             for field in required_fields:
-                assert field in template, (
-                    f"Template '{name}' missing field '{field}'"
-                )
+                assert field in template, f"Template '{name}' missing field '{field}'"
 
     @pytest.mark.asyncio
     async def test_template_names_match_keys(self):
@@ -113,9 +111,11 @@ class TestRenderVideo:
         mock_subprocess.return_value = mock_process
 
         # Create a fake output file so verification passes
-        with patch.object(Path, "exists", return_value=True), \
-             patch.object(Path, "stat") as mock_stat, \
-             patch("builtins.open", MagicMock()):
+        with (
+            patch.object(Path, "exists", return_value=True),
+            patch.object(Path, "stat") as mock_stat,
+            patch("builtins.open", MagicMock()),
+        ):
             mock_stat.return_value = MagicMock(st_size=5 * 1024 * 1024)
             result = await server.render_video(
                 template="ReelTips",
@@ -326,7 +326,9 @@ class TestHelpers:
 
     def test_get_output_dir_creates_directory(self, tmp_path):
         with patch.object(
-            Path, "resolve", return_value=tmp_path / "mcp-servers" / "mcp-remotion-render" / "server.py"
+            Path,
+            "resolve",
+            return_value=tmp_path / "mcp-servers" / "mcp-remotion-render" / "server.py",
         ):
             # Just verify the function doesn't crash with a custom timestamp
             output_dir = server._get_output_dir("20260401_120000")

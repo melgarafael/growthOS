@@ -30,7 +30,9 @@ class TestInitialState:
 
 class TestClosedToOpen:
     @pytest.mark.asyncio
-    async def test_opens_after_threshold_failures(self, breaker: CircuitBreaker) -> None:
+    async def test_opens_after_threshold_failures(
+        self, breaker: CircuitBreaker
+    ) -> None:
         async def fail():
             raise RuntimeError("boom")
 
@@ -87,7 +89,9 @@ class TestOpenState:
 
 class TestHalfOpen:
     @pytest.mark.asyncio
-    async def test_transitions_to_half_open_after_timeout(self, breaker: CircuitBreaker) -> None:
+    async def test_transitions_to_half_open_after_timeout(
+        self, breaker: CircuitBreaker
+    ) -> None:
         async def fail():
             raise RuntimeError("boom")
 

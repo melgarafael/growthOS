@@ -21,6 +21,7 @@ from growthOS_shared.config import (
 # Fixtures
 # ---------------------------------------------------------------------------
 
+
 @pytest.fixture
 def brand_config():
     return BrandVoiceConfig(
@@ -52,6 +53,7 @@ def brand_config_no_slop():
 # Template loading
 # ---------------------------------------------------------------------------
 
+
 class TestLoadTemplate:
     def test_loads_all_valid_styles(self):
         for style in VALID_STYLES:
@@ -75,9 +77,9 @@ class TestLoadTemplate:
     def test_template_has_seo_tags(self):
         for style in VALID_STYLES:
             html = _load_template(style)
-            assert 'og:title' in html
-            assert 'og:description' in html
-            assert 'twitter:card' in html
+            assert "og:title" in html
+            assert "og:description" in html
+            assert "twitter:card" in html
             assert 'meta name="description"' in html
 
     def test_no_external_dependencies(self):
@@ -91,6 +93,7 @@ class TestLoadTemplate:
 # ---------------------------------------------------------------------------
 # Anti-slop filter
 # ---------------------------------------------------------------------------
+
 
 class TestAntiSlop:
     def test_removes_banned_phrases(self, brand_config):
@@ -118,6 +121,7 @@ class TestAntiSlop:
 # Tone suffix builder
 # ---------------------------------------------------------------------------
 
+
 class TestBuildToneSuffix:
     def test_single_tone(self, brand_config_no_slop):
         assert _build_tone_suffix(brand_config_no_slop) == "casual"
@@ -136,6 +140,7 @@ class TestBuildToneSuffix:
 # ---------------------------------------------------------------------------
 # Full generation
 # ---------------------------------------------------------------------------
+
 
 class TestGenerateLandingPage:
     def test_generates_valid_html(self):
@@ -156,7 +161,10 @@ class TestGenerateLandingPage:
 
     def test_custom_cta(self):
         html = generate_landing_page(
-            "Acme", "Desc", cta_text="Sign Up Now", cta_url="https://acme.dev",
+            "Acme",
+            "Desc",
+            cta_text="Sign Up Now",
+            cta_url="https://acme.dev",
         )
         assert "Sign Up Now" in html
         assert "https://acme.dev" in html
@@ -172,7 +180,8 @@ class TestGenerateLandingPage:
 
     def test_custom_testimonial(self):
         html = generate_landing_page(
-            "Acme", "Desc",
+            "Acme",
+            "Desc",
             testimonial_text="Amazing product!",
             testimonial_author="Jane Doe",
         )
@@ -181,7 +190,8 @@ class TestGenerateLandingPage:
 
     def test_brand_config_integration(self, brand_config):
         html = generate_landing_page(
-            "Acme", "A game-changer for devs.",
+            "Acme",
+            "A game-changer for devs.",
             brand_config=brand_config,
         )
         assert "game-changer" not in html
@@ -204,7 +214,7 @@ class TestGenerateLandingPage:
     def test_responsive_viewport_tag(self):
         for style in VALID_STYLES:
             html = generate_landing_page("Acme", "Test.", style=style)
-            assert 'width=device-width' in html
+            assert "width=device-width" in html
 
     def test_custom_headline(self):
         html = generate_landing_page("Acme", "Desc", headline="Ship Faster")
@@ -222,6 +232,7 @@ class TestGenerateLandingPage:
 # ---------------------------------------------------------------------------
 # Utility
 # ---------------------------------------------------------------------------
+
 
 class TestListStyles:
     def test_returns_all_styles(self):

@@ -6,7 +6,6 @@ from platforms.base import PlatformAdapter
 
 
 class ThreadsAdapter(PlatformAdapter):
-
     @property
     def platform_name(self) -> str:
         return "threads"
@@ -20,11 +19,13 @@ class ThreadsAdapter(PlatformAdapter):
         if not content.strip():
             errors.append("Content cannot be empty")
         if len(content) > self.max_length:
-            errors.append(f"Content exceeds {self.max_length} characters ({len(content)})")
+            errors.append(
+                f"Content exceeds {self.max_length} characters ({len(content)})"
+            )
         return errors
 
     async def preview(self, content: str) -> str:
-        text = content[:self.max_length]
+        text = content[: self.max_length]
         preview = "┌─ Threads Post Preview ────────────────┐\n"
         preview += "│ @you\n"
         preview += "│\n"

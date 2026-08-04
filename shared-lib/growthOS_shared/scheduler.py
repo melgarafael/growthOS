@@ -28,6 +28,7 @@ logger = logging.getLogger(__name__)
 # Content Calendar Schema
 # ---------------------------------------------------------------------------
 
+
 class ContentStatus(str, Enum):
     DRAFT = "draft"
     SCHEDULED = "scheduled"
@@ -85,6 +86,7 @@ class CalendarEntry(BaseModel):
 # ---------------------------------------------------------------------------
 # Schedule Definitions
 # ---------------------------------------------------------------------------
+
 
 class ScheduleAction(str, Enum):
     """Built-in actions a schedule can trigger."""
@@ -184,15 +186,21 @@ async def retry_with_backoff(
             if attempt >= cfg.max_retries:
                 logger.error(
                     "All %d retries exhausted for %s: %s",
-                    cfg.max_retries, func.__name__, exc,
+                    cfg.max_retries,
+                    func.__name__,
+                    exc,
                 )
                 raise
-            delay = min(cfg.base_delay * (2 ** attempt), cfg.max_delay)
+            delay = min(cfg.base_delay * (2**attempt), cfg.max_delay)
             if cfg.jitter:
                 delay *= 0.5 + random.random()
             logger.warning(
                 "Transient error (attempt %d/%d) in %s: %s — retrying in %.1fs",
-                attempt + 1, cfg.max_retries, func.__name__, exc, delay,
+                attempt + 1,
+                cfg.max_retries,
+                func.__name__,
+                exc,
+                delay,
             )
             await asyncio.sleep(delay)
 
@@ -202,6 +210,7 @@ async def retry_with_backoff(
 # ---------------------------------------------------------------------------
 # Publish Orchestration
 # ---------------------------------------------------------------------------
+
 
 @dataclass
 class PublishResult:
@@ -253,12 +262,16 @@ class ScheduledPublisher:
     async def _publish(self, entry: CalendarEntry) -> PublishResult:
         if not self.publish_handler:
             return PublishResult(
-                entry=entry, success=False,
-                action_taken="failed", error="No publish handler configured",
+                entry=entry,
+                success=False,
+                action_taken="failed",
+                error="No publish handler configured",
             )
         try:
             await retry_with_backoff(
-                self.publish_handler, entry, config=self.retry_config,
+                self.publish_handler,
+                entry,
+                config=self.retry_config,
             )
             entry.status = ContentStatus.PUBLISHED
             return PublishResult(entry=entry, success=True, action_taken="published")
@@ -267,19 +280,26 @@ class ScheduledPublisher:
             entry.retry_count = self.retry_config.max_retries
             entry.last_error = str(exc)
             return PublishResult(
-                entry=entry, success=False, action_taken="failed",
-                error=str(exc), attempts=self.retry_config.max_retries + 1,
+                entry=entry,
+                success=False,
+                action_taken="failed",
+                error=str(exc),
+                attempts=self.retry_config.max_retries + 1,
             )
 
     async def _create_draft(self, entry: CalendarEntry) -> PublishResult:
         if self.draft_handler:
             try:
                 await retry_with_backoff(
-                    self.draft_handler, entry, config=self.retry_config,
+                    self.draft_handler,
+                    entry,
+                    config=self.retry_config,
                 )
             except Exception as exc:
                 return PublishResult(
-                    entry=entry, success=False, action_taken="failed",
+                    entry=entry,
+                    success=False,
+                    action_taken="failed",
                     error=f"Draft creation failed: {exc}",
                 )
         entry.status = ContentStatus.DRAFT
@@ -289,19 +309,26 @@ class ScheduledPublisher:
         if self.notify_handler:
             try:
                 await retry_with_backoff(
-                    self.notify_handler, entry, config=self.retry_config,
+                    self.notify_handler,
+                    entry,
+                    config=self.retry_config,
                 )
             except Exception as exc:
                 return PublishResult(
-                    entry=entry, success=False, action_taken="failed",
+                    entry=entry,
+                    success=False,
+                    action_taken="failed",
                     error=f"Notification failed: {exc}",
                 )
-        return PublishResult(entry=entry, success=True, action_taken="notification_sent")
+        return PublishResult(
+            entry=entry, success=True, action_taken="notification_sent"
+        )
 
 
 # ---------------------------------------------------------------------------
 # CronCreate Integration
 # ---------------------------------------------------------------------------
+
 
 @dataclass
 class RegisteredJob:
@@ -334,9 +361,11 @@ def prepare_cron_jobs(config: ScheduleConfig) -> list[RegisteredJob]:
     """
     jobs: list[RegisteredJob] = []
     for sched in config.get_enabled():
-        jobs.append(RegisteredJob(
-            name=sched.name,
-            cron=sched.cron,
-            prompt=build_cron_prompt(sched),
-        ))
+        jobs.append(
+            RegisteredJob(
+                name=sched.name,
+                cron=sched.cron,
+                prompt=build_cron_prompt(sched),
+            )
+        )
     return jobs

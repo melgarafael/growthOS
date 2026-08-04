@@ -440,6 +440,51 @@ observer.observe(hero);
 
 ---
 
+## 8. WhatsApp Lead Handoff (No-Backend Form Submit)
+
+**Description:** The lead form has no server to submit to — the single-file landing page has none —
+so the submit handler builds a pre-filled WhatsApp message from the form fields and hands the
+visitor off to `wa.me` to send it themselves. Zero backend, zero API keys.
+
+**When to use:** Any lead-gen page for a Brazilian/LatAm audience where WhatsApp is the primary
+contact channel and there's no CRM/webhook to POST to yet.
+
+```html
+<form id="lead-form" data-whatsapp-number="5511999998888">
+  <input id="nome" name="nome" required>
+  <input id="email" type="email" name="email" required>
+  <button type="submit">Enviar</button>
+</form>
+```
+
+```javascript
+leadForm.addEventListener('submit', function (event) {
+  event.preventDefault();
+  if (!leadForm.checkValidity()) { leadForm.reportValidity(); return; }
+
+  var waUrl = 'https://wa.me/' + leadForm.dataset.whatsappNumber +
+    '?text=' + encodeURIComponent(buildMessageFromFields());
+
+  var newWin = null;
+  try { newWin = window.open(waUrl, '_blank', 'noopener'); } catch (err) { newWin = null; }
+  // window.open silently returns null when blocked — by a popup blocker OR by a
+  // sandboxed embedding (iframe without "allow-popups", e.g. a preview/artifact host).
+  // Always fall back to same-tab navigation or the lead is lost with no error shown.
+  if (!newWin) {
+    window.location.href = waUrl;
+  }
+});
+```
+
+**Gotcha (confirmed by testing):** Previewing this page inside a sandboxed iframe without
+`allow-popups` (common for embedded/artifact previews) makes `window.open()` fail silently —
+no exception, no console output the user would notice, the button just does nothing. The
+`if (!newWin)` fallback is required, not optional; test every WhatsApp-handoff form inside a
+restrictive iframe (`sandbox="allow-scripts allow-forms allow-same-origin"`, no `allow-popups`)
+before calling it done, since a normal top-level browser tab won't reproduce the failure.
+
+---
+
 ## CTA Placement Strategy
 
 ```

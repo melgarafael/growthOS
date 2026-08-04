@@ -210,7 +210,14 @@ class TestGenerateCarouselStyleValidation:
             assert len(result.slides) == 3
 
     def test_valid_styles_list(self) -> None:
-        expected = {"minimal", "bold", "gradient", "clean-educator", "dark-premium", "vibrant-creator"}
+        expected = {
+            "minimal",
+            "bold",
+            "gradient",
+            "clean-educator",
+            "dark-premium",
+            "vibrant-creator",
+        }
         assert set(VALID_STYLES) == expected
 
     def test_invalid_style_raises(self, tmp_path: Path) -> None:
@@ -350,7 +357,9 @@ class TestGenerateCarouselBrandIntegration:
         # (may be in active content or HTML comments depending on slide type)
         all_content = ""
         for i in range(1, 6):
-            all_content += (tmp_path / f"slide-{i:02d}.html").read_text(encoding="utf-8")
+            all_content += (tmp_path / f"slide-{i:02d}.html").read_text(
+                encoding="utf-8"
+            )
         assert "TestBrand" in all_content or "testbrand" in all_content, (
             "Brand name 'TestBrand' not found in any slide"
         )
@@ -388,7 +397,10 @@ class TestGenerateCarouselContentRendering:
         # Use minimum 3 slides for validation
         slides = _make_slides(3)
         slides[0] = _make_slide(
-            slide_number=1, total_slides=3, type="cover", headline="My Big Headline",
+            slide_number=1,
+            total_slides=3,
+            type="cover",
+            headline="My Big Headline",
         )
         generate_carousel(slides=slides, output_dir=str(tmp_path))
         content = (tmp_path / "slide-01.html").read_text(encoding="utf-8")

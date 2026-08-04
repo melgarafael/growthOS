@@ -24,7 +24,6 @@ Como fazer a análise depois:
 
 import argparse
 import hashlib
-import sys
 from datetime import datetime
 from pathlib import Path
 
@@ -94,6 +93,7 @@ def hash_file(path: Path) -> str:
 
 def load_sidecar(asset_path: Path):
     import yaml
+
     sidecar = META_DIR / f"{asset_path.name}.meta.yaml"
     if not sidecar.exists():
         return sidecar, {}
@@ -105,6 +105,7 @@ def load_sidecar(asset_path: Path):
 
 def save_sidecar(sidecar_path: Path, data: dict):
     import yaml
+
     sidecar_path.parent.mkdir(parents=True, exist_ok=True)
     sidecar_path.write_text(yaml.safe_dump(data, sort_keys=False, allow_unicode=True))
 
@@ -177,7 +178,7 @@ def prepare_skeleton(asset_path: Path):
     rel_sidecar = sidecar.relative_to(GROWTHOS)
     print(f"✅ skeleton preparado: {rel_sidecar}")
     print(f"   asset: {asset_path.relative_to(GROWTHOS)}")
-    print(f"   status: pending")
+    print("   status: pending")
 
 
 def prepare_all():
@@ -196,10 +197,22 @@ def print_schema():
 
 def main():
     parser = argparse.ArgumentParser(description="Asset vision pending manager")
-    parser.add_argument("--pending", action="store_true", help="lista assets pendentes de análise")
-    parser.add_argument("--prepare", metavar="PATH", help="cria skeleton no sidecar de 1 asset")
-    parser.add_argument("--prepare-all", action="store_true", help="cria skeleton pra todos os pendentes")
-    parser.add_argument("--schema", action="store_true", help="imprime o schema esperado pro bloco vision")
+    parser.add_argument(
+        "--pending", action="store_true", help="lista assets pendentes de análise"
+    )
+    parser.add_argument(
+        "--prepare", metavar="PATH", help="cria skeleton no sidecar de 1 asset"
+    )
+    parser.add_argument(
+        "--prepare-all",
+        action="store_true",
+        help="cria skeleton pra todos os pendentes",
+    )
+    parser.add_argument(
+        "--schema",
+        action="store_true",
+        help="imprime o schema esperado pro bloco vision",
+    )
     args = parser.parse_args()
 
     if args.pending:

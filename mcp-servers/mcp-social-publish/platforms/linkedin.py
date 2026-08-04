@@ -6,7 +6,6 @@ from platforms.base import PlatformAdapter
 
 
 class LinkedInAdapter(PlatformAdapter):
-
     @property
     def platform_name(self) -> str:
         return "linkedin"
@@ -20,7 +19,9 @@ class LinkedInAdapter(PlatformAdapter):
         if not content.strip():
             errors.append("Content cannot be empty")
         if len(content) > self.max_length:
-            errors.append(f"Content exceeds {self.max_length} characters ({len(content)})")
+            errors.append(
+                f"Content exceeds {self.max_length} characters ({len(content)})"
+            )
         return errors
 
     async def preview(self, content: str) -> str:
