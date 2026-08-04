@@ -47,6 +47,8 @@ PUBLISH     — needs content scheduled, posted, or distributed to platforms
 RESEARCH    — needs market research, competitive analysis, trend analysis, audience insights
 VISUAL      — needs images, graphics, thumbnails, social media visuals, brand assets
 LANDING     — needs a landing page, conversion page, or web page built
+VIDEO_CREATE — needs a video generated from a text brief, no source footage (Reels, Shorts, explainers, motion graphics)
+VIDEO_EDIT  — has an actual raw video FILE (phone/camera recording) that needs cutting, cleanup, and captions
 PIPELINE    — multi-step workflow that spans 2+ categories above
 CONFIGURE   — setup, brand voice, platform connections, settings
 STATUS      — check on campaigns, analytics, scheduled content
@@ -70,10 +72,12 @@ HELP        — explain GrowthOS capabilities, how to use features
 | CREATE | `content-creator` | `copywriting` | CMO handles for single-line copy |
 | PUBLISH | `social-publisher` | `platform-mastery` | CMO queues if publisher unavailable |
 | RESEARCH | `intelligence-analyst` | `competitive-intelligence` | CMO does basic research directly |
-| VISUAL | `visual-designer` | — | CMO describes needs if designer unavailable |
-| LANDING | `sales-page-architect` | `sales-page` | CMO loads `sales-page` skill for the 8-phase pipeline. Replaces old `landing-page-design`. |
+| VISUAL | `visual-designer` | — | Default renders via Kairogen (`providers.image` in brand-voice.yaml, `mcp__kairogen__generate_image`); CMO describes needs / spec-only if designer or Kairogen unavailable |
+| LANDING | `sales-page-architect` | `sales-page` | CMO loads `sales-page` skill for the 8-phase pipeline. Replaces old `landing-page-design`. Phase 4 animation defaults to `providers.website_animation_strategy` (cinematic) — CSS-only, no external JS motion libs, to keep the single-file/zero-dependency architecture. |
 | SALES_PAGE | `sales-page-architect` | `sales-page` | Same as LANDING — explicit alias for clarity |
 | MEME | `meme-creator` | `meme-creation`, `copywriting`, `platform-mastery` | CMO handles for simple single-line meme ideas |
+| VIDEO_CREATE | `video-producer` | `video-production`, `platform-mastery`, + `remotion-video` when the Remotion path is used | Default provider is Kairogen (`providers.video` in brand-voice.yaml) via `mcp__kairogen__generate_video`; falls back to the Remotion pipeline for motion-graphics-specific templates or if Kairogen is unavailable |
+| VIDEO_EDIT | `video-editor` | `raw-footage-editing`, `platform-mastery` | No fallback — needs ffmpeg/auto-editor/whisper-cli on the machine; if missing, video-editor reports that instead of guessing |
 | PIPELINE | CMO orchestrates | Multiple skills | Break into sequential steps |
 | CONFIGURE | CMO handles directly | — | — |
 | STATUS | CMO handles directly | — | — |
