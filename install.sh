@@ -3,13 +3,13 @@
 # GrowthOS installer
 #
 # Why this exists:
-#   GrowthOS is distributed as a git repo (NOT via the Claude
-#   Code marketplace). Cloning alone is not enough — Claude Code
-#   only discovers plugins that live inside its plugin directory
-#   (~/.claude/plugins/<plugin-name>). This script symlinks the
-#   cloned repo into that directory so all skills, agents,
-#   commands and hooks become available as slash commands like
-#   /grow and /growthOS:<skill>.
+#   Claude Code does NOT discover plugins by their presence in
+#   ~/.claude/plugins/<name> — that directory is Claude Code's
+#   own managed state (cache/, marketplaces/, installed_plugins.json).
+#   A plugin is discovered only when it is registered as a
+#   marketplace and installed from it. This repo ships its own
+#   local marketplace manifest (.claude-plugin/marketplace.json),
+#   so the two commands below are all that is needed.
 #
 # Usage:
 #   git clone https://github.com/melgarafael/growthOS.git
@@ -20,13 +20,10 @@
 set -euo pipefail
 
 REPO_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-PLUGIN_NAME="growthOS"
-CLAUDE_PLUGINS_DIR="${HOME}/.claude/plugins"
-TARGET="${CLAUDE_PLUGINS_DIR}/${PLUGIN_NAME}"
+PLUGIN_ID="growthOS@growthOS"
 
 echo "→ GrowthOS installer"
-echo "  repo:   ${REPO_DIR}"
-echo "  target: ${TARGET}"
+echo "  repo: ${REPO_DIR}"
 echo
 
 # Sanity: must be run from inside the repo
@@ -35,28 +32,28 @@ if [[ ! -f "${REPO_DIR}/.claude-plugin/plugin.json" ]]; then
   exit 1
 fi
 
-mkdir -p "${CLAUDE_PLUGINS_DIR}"
-
-# If target already exists, handle gracefully
-if [[ -L "${TARGET}" ]]; then
-  CURRENT="$(readlink "${TARGET}")"
-  if [[ "${CURRENT}" == "${REPO_DIR}" ]]; then
-    echo "✓ already linked to this repo — nothing to do."
-    exit 0
-  fi
-  echo "! ${TARGET} is a symlink pointing elsewhere (${CURRENT})."
-  read -r -p "  replace it? [y/N] " ans
-  [[ "${ans}" =~ ^[Yy]$ ]] || { echo "aborted."; exit 1; }
-  rm "${TARGET}"
-elif [[ -e "${TARGET}" ]]; then
-  echo "! ${TARGET} already exists and is not a symlink."
-  read -r -p "  back it up to ${TARGET}.bak and replace? [y/N] " ans
-  [[ "${ans}" =~ ^[Yy]$ ]] || { echo "aborted."; exit 1; }
-  mv "${TARGET}" "${TARGET}.bak"
+if ! command -v claude >/dev/null 2>&1; then
+  echo "✗ the 'claude' CLI is not on PATH — install Claude Code first." >&2
+  exit 1
 fi
 
-ln -s "${REPO_DIR}" "${TARGET}"
-echo "✓ linked ${TARGET} → ${REPO_DIR}"
+# Fail fast on a malformed manifest instead of installing something broken
+echo "→ validating manifests…"
+claude plugin validate "${REPO_DIR}"
+
+# Remove the symlink left behind by older versions of this installer
+LEGACY_LINK="${HOME}/.claude/plugins/growthOS"
+if [[ -L "${LEGACY_LINK}" ]]; then
+  rm "${LEGACY_LINK}"
+  echo "✓ removed legacy symlink ${LEGACY_LINK} (no longer used)"
+fi
+
+echo "→ registering local marketplace…"
+claude plugin marketplace add "${REPO_DIR}" --scope user 2>&1 | tail -1 || true
+claude plugin marketplace update growthOS >/dev/null 2>&1 || true
+
+echo "→ installing plugin…"
+claude plugin install "${PLUGIN_ID}" --scope user -y
 
 # Copy brand-voice template if user has not set one yet
 if [[ ! -f "${REPO_DIR}/brand-voice.yaml" && -f "${REPO_DIR}/brand-voice.example.yaml" ]]; then
@@ -70,19 +67,24 @@ cat <<EOF
 ✓ GrowthOS installed.
 
 Next steps:
-  1. Restart Claude Code (or open a new session) so it picks
-     up the new plugin.
+  1. Restart Claude Code (exit the session and open a new one).
   2. Run the onboarding wizard:
         /grow setup
-  3. List available skills / commands to verify:
-        /help
+  3. Verify what actually loaded:
+        claude plugin details growthOS
 
 If the slash commands still don't appear:
-  - confirm the symlink:  ls -la ~/.claude/plugins/growthOS
-  - confirm plugin.json:  cat ~/.claude/plugins/growthOS/.claude-plugin/plugin.json
+  - claude plugin list                 # must show growthOS@growthOS as enabled
+  - claude plugin details growthOS     # must list the commands, agents and skills
+  - claude plugin validate .           # manifest must pass
   - restart Claude Code fully.
 
+After editing this repo, re-sync the installed copy:
+  claude plugin marketplace update growthOS && claude plugin update ${PLUGIN_ID}
+  (if the version did not change, reinstall: claude plugin uninstall ${PLUGIN_ID} && claude plugin install ${PLUGIN_ID} -y)
+
 To uninstall:
-  rm ~/.claude/plugins/growthOS
+  claude plugin uninstall ${PLUGIN_ID}
+  claude plugin marketplace remove growthOS
 ──────────────────────────────────────────────────────────────
 EOF

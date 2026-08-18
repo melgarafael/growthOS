@@ -244,7 +244,7 @@
 ### Verificacoes:
 1. CMO router.md referencia agentes que existem em agents/
 2. COMMAND.md subcommands delegam a agentes que existem
-3. plugin.json commands[] → commands/grow/ existe
+3. plugin.json por convenção → commands/grow.md existe
 4. plugin.json skills[] → skills/*/ existem
 5. plugin.json agents[] → agents/*/ existem
 6. plugin.json hooks[] → hooks/*.md existem
