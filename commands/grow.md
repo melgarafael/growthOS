@@ -475,7 +475,7 @@ Quando o UiUX Expert terminar, o arquivo novo aparece em `design-system/` e voc√
 #### Subcommand: `free-content`
 
 **Syntax:** `/grow free-content [source]`
-**Docs:** `growthOS/commands/grow/FREE-CONTENT.md`
+**Docs:** `growthOS/docs/grow/FREE-CONTENT.md`
 
 Bridge from Educational Team (TIM) to GrowthOS. Dispatches `Orquestrador - Educational team` via Maestri to transcribe a lesson/video and extract viral chunks, then pipes each chunk into the normal carousel pipeline via `content-factory` skill.
 

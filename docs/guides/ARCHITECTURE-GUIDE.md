@@ -83,7 +83,7 @@ produzir scripts de video e orquestrar campanhas -- tudo a partir de linguagem n
                                    v
                     +------------------------------+
                     |   COMMAND INTERFACE           |
-                    |   commands/grow/COMMAND.md    |
+                    |   commands/grow.md    |
                     |                              |
                     |  1. First-run detection       |
                     |  2. Parse argumentos           |
@@ -219,7 +219,7 @@ produzir scripts de video e orquestrar campanhas -- tudo a partir de linguagem n
 
 ### Camada 1: Command Interface
 
-**Localizacao:** `commands/grow/COMMAND.md`
+**Localizacao:** `commands/grow.md`
 
 A camada de entrada do sistema. O comando `/grow` e o unico ponto de interacao
 do usuario com o GrowthOS.

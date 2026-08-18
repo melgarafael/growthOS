@@ -22,7 +22,9 @@ GrowthOS turns Claude Code into a full-stack growth engine: strategy, content cr
 
 ## Installation
 
-> GrowthOS is distributed **only via `git clone`** — it is not published on the Claude Code marketplace. The `install.sh` script wires the cloned repo into `~/.claude/plugins/growthOS` so Claude Code discovers every skill, agent, command, and hook as a real slash command (`/grow`, `/growthOS:<skill>`).
+> GrowthOS is distributed **only via `git clone`** — it is not published on the public Claude Code marketplace. The repo ships its own **local marketplace manifest** (`.claude-plugin/marketplace.json`), and `install.sh` registers it and installs the plugin from it, so Claude Code discovers every skill, agent and command as a real slash command (`/grow`, `/growthOS:<skill>`).
+>
+> Dropping the repo (or a symlink to it) into `~/.claude/plugins/` does **not** work — that directory is Claude Code's own managed state, not a discovery path.
 
 ### What do I need to install?
 
@@ -47,7 +49,10 @@ cd growthOS
 
 What the installer does:
 
-- Creates a symlink `~/.claude/plugins/growthOS → <your clone>` (standard Claude Code plugin discovery path).
+- Validates the manifests (`claude plugin validate .`) and aborts if they are malformed.
+- Registers the clone as a local marketplace (`claude plugin marketplace add <your clone>`).
+- Installs the plugin from it (`claude plugin install growthOS@growthOS`).
+- Removes the obsolete `~/.claude/plugins/growthOS` symlink left by older installers.
 - Copies `brand-voice.example.yaml` → `brand-voice.yaml` if you don't have one yet.
 - Prints next steps.
 
@@ -94,17 +99,30 @@ It writes to `brand-voice.yaml`, which all agents read to stay on-brand. That fi
 ### Uninstall
 
 ```bash
-rm ~/.claude/plugins/growthOS
+claude plugin uninstall growthOS@growthOS
+claude plugin marketplace remove growthOS
 ```
 
 ### Troubleshooting — slash commands not showing up
 
 If `/grow` or `/growthOS:<skill>` do not appear after install:
 
-1. Confirm the symlink exists: `ls -la ~/.claude/plugins/growthOS`
-2. Confirm the manifest: `cat ~/.claude/plugins/growthOS/.claude-plugin/plugin.json`
-3. Fully restart Claude Code (not just reload — exit the session and reopen).
-4. Inside Claude Code, run `/help` to list loaded plugins.
+1. Confirm the plugin is installed **and enabled**: `claude plugin list` — you should see `growthOS@growthOS` with `Status: enabled`.
+2. Confirm what actually loaded: `claude plugin details growthOS` — it must list `grow` plus the agents and skills. If a section shows `(0)`, the manifest or the file layout is wrong, not the install.
+3. Validate the manifests: `claude plugin validate .` — it must pass.
+4. Fully restart Claude Code (not just reload — exit the session and reopen).
+
+**After editing this repo**, the installed copy is a snapshot under `~/.claude/plugins/cache/` and does not track your edits. Re-sync it:
+
+```bash
+claude plugin marketplace update growthOS && claude plugin update growthOS@growthOS
+# if the version did not change, the update is a no-op — reinstall instead:
+claude plugin uninstall growthOS@growthOS && claude plugin install growthOS@growthOS -y
+```
+
+**File layout matters.** Claude Code discovers components by convention:
+`commands/<name>.md`, `agents/<name>.md`, `skills/<name>/SKILL.md`.
+A command at `commands/grow/COMMAND.md` does **not** register as `/grow`.
 
 ---
 
@@ -239,22 +257,27 @@ Or just run `/grow setup` and the wizard handles it for you.
 
 ```
 growthOS/
-├── plugin.json                  # Plugin manifest (entry point)
+├── .claude-plugin/
+│   ├── plugin.json              # Plugin manifest (what Claude Code reads)
+│   └── marketplace.json         # Local marketplace used by install.sh
 ├── brand-voice.example.yaml     # Brand config template
 ├── .env.example                 # Environment variables template
 │
-├── agents/                      # 9 AI agents
-│   ├── cmo/                     #   CMO — intent router
-│   ├── growth-strategist/       #   Strategic planning
-│   ├── content-creator/         #   Content production
-│   ├── intelligence-analyst/    #   Competitive intel
-│   ├── visual-designer/         #   Visual assets
-│   ├── social-publisher/        #   Social media ops
-│   ├── growth-engineer/         #   Technical growth
-│   ├── carousel-designer/       #   Carousel generation
-│   └── video-producer/          #   Video production
+├── agents/                      # 12 AI agents (one .md per agent)
+│   ├── cmo.md                   #   CMO — intent router
+│   ├── growth-strategist.md     #   Strategic planning
+│   ├── content-creator.md       #   Content production
+│   ├── intelligence-analyst.md  #   Competitive intel
+│   ├── visual-designer.md       #   Visual assets
+│   ├── social-publisher.md      #   Social media ops
+│   ├── growth-engineer.md       #   Technical growth
+│   ├── carousel-designer.md     #   Carousel generation
+│   ├── caption-writer.md        #   Instagram captions
+│   ├── sales-page-architect.md  #   Sales page structure
+│   ├── sales-page-qa.md         #   Sales page QA
+│   └── video-producer.md        #   Video production
 │
-├── skills/                      # 20 specialized skills
+├── skills/                      # 26 specialized skills
 │   ├── marketing-strategy/      #   Core skills (11)
 │   ├── copywriting/
 │   ├── seo-growth/
@@ -274,7 +297,13 @@ growthOS/
 │   ├── showcase-product-demo/
 │   ├── showcase-social-proof/
 │   ├── showcase-tech-terminal/
-│   └── showcase-walkthrough/
+│   ├── showcase-walkthrough/
+│   ├── sales-page/              #   Sales page system (6)
+│   ├── sales-page-discovery/
+│   ├── sales-page-research/
+│   ├── sales-page-visual-psychology/
+│   ├── sales-page-narrative/
+│   └── sales-page-builder/
 │
 ├── mcp-servers/                 # 4 MCP servers (Python/FastMCP)
 │   ├── mcp-social-publish/      #   Publish to 5 platforms
@@ -299,8 +328,8 @@ growthOS/
 │   ├── preview-before-publish.md#   Preview before sending
 │   └── dry-run-guard.md         #   Block real calls in dry-run
 │
-├── commands/                    # CLI commands
-│   └── grow/                    #   /grow entry point + setup
+├── commands/                    # Slash commands (one .md per command)
+│   └── grow.md                  #   /grow entry point
 │
 ├── remotion/                    # Video rendering engine
 │   └── src/
