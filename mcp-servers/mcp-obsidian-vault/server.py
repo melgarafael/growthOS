@@ -32,6 +32,7 @@ async def create_note(
     note_type: str = "",
     status: str = "",
     platform: str | None = None,
+    area: str = "",
 ) -> dict:
     """Create a new markdown note in the Obsidian vault.
 
@@ -43,6 +44,9 @@ async def create_note(
         note_type: Optional note type (e.g. "idea", "article", "reference")
         status: Optional status (e.g. "draft", "published")
         platform: Optional platform identifier
+        area: Optional vault area override (e.g. "pessoal", "profissional",
+            "pesquisa", "ai-memory"). Defaults to "ai-memory" — the area
+            obsidian-master-kit reserves for AI-generated content.
     """
     try:
         frontmatter_data: dict = {}
@@ -54,6 +58,8 @@ async def create_note(
             frontmatter_data["status"] = status
         if platform:
             frontmatter_data["platform"] = platform
+        if area:
+            frontmatter_data["area"] = area
 
         filepath = vault.create(path, title, content, frontmatter_data or None)
         return {

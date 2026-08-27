@@ -56,7 +56,8 @@ class TestCreate:
         assert data["frontmatter"]["tags"] == ["ai", "growth"]
         assert data["frontmatter"]["type"] == "idea"
         assert data["frontmatter"]["status"] == "draft"
-        assert "date" in data["frontmatter"]
+        assert "created" in data["frontmatter"]
+        assert "updated" in data["frontmatter"]
 
     def test_create_with_platform(self, vault):
         vault.create(
@@ -254,7 +255,8 @@ class TestGetFrontmatter:
         assert fm["title"] == "FM Note"
         assert fm["tags"] == ["test"]
         assert fm["type"] == "idea"
-        assert "date" in fm
+        assert "created" in fm
+        assert "updated" in fm
 
     def test_get_frontmatter_nonexistent(self, vault):
         with pytest.raises(FileNotFoundError):
@@ -266,8 +268,10 @@ class TestGetFrontmatter:
         assert fm["title"] == "Defaults"
         assert fm["tags"] == []
         assert fm["type"] == ""
-        assert fm["status"] == ""
-        assert "date" in fm
+        assert fm["status"] == "draft"
+        assert fm["area"] == "ai-memory"
+        assert "created" in fm
+        assert "updated" in fm
 
 
 # ------------------------------------------------------------------
