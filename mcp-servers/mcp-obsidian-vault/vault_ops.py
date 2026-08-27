@@ -16,14 +16,23 @@ sys.path.insert(0, _shared_lib)
 
 from growthOS_shared import AuditLogger  # noqa: E402
 
-# Default frontmatter schema fields
+# Default frontmatter schema fields.
+# Aligned with obsidian-master-kit's canonical schema (created/updated/area/type/
+# status/tags) so notes written here are recognized by its librarian instead of
+# being flagged as mismatched. "ai-memory" is the area obsidian-master-kit
+# reserves for AI-generated content.
 _FRONTMATTER_DEFAULTS = {
     "title": "",
-    "date": "",
-    "tags": [],
+    "area": "ai-memory",
     "type": "",
-    "status": "",
+    "status": "draft",
+    "tags": [],
 }
+
+# Frontmatter keys that, once set at creation, must never be overwritten by an
+# update — obsidian-master-kit's librarian enforces this same rule and reverts
+# any skill that tries to change them.
+_IMMUTABLE_FIELDS = {"created"}
 
 # Optional fields that are included only when provided
 _OPTIONAL_FIELDS = {"platform"}
@@ -66,10 +75,12 @@ class VaultOperations:
 
     def _build_frontmatter(self, title: str, extra: Optional[dict] = None) -> dict:
         """Build a frontmatter dict with schema defaults."""
+        today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
         fm: dict = {
             **_FRONTMATTER_DEFAULTS,
             "title": title,
-            "date": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
+            "created": today,
+            "updated": today,
         }
         if extra:
             for key, value in extra.items():
@@ -172,7 +183,11 @@ class VaultOperations:
             post.content = content
         if frontmatter_updates:
             for key, value in frontmatter_updates.items():
+                if key in _IMMUTABLE_FIELDS:
+                    continue
                 post.metadata[key] = value
+
+        post.metadata["updated"] = datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
         filepath.write_text(frontmatter.dumps(post), encoding="utf-8")
 
